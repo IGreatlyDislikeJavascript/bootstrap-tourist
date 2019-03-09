@@ -1,6 +1,6 @@
 /* ========================================================================
  *
- * Bootstrap Tourist v0.7
+ * Bootstrap Tourist v0.8
  * Copyright FFS 2019
  * @ IGreatlyDislikeJavascript on Github
  *
@@ -40,7 +40,11 @@
  * limitations under the License.
  * ========================================================================
  *
- * Updated for CS by FFS 2018 - v0.7
+ * Updated for CS by FFS 2018 - v0.8
+ *
+ * Changes from 0.7:
+ *  - Fast release to fix breaking change in Bootstrap 3.4.1, fixes this issue: https://github.com/sorich87/bootstrap-tour/issues/723#issuecomment-471107788
+ *		Issue is caused by the BS sanitizer, to avoid this reoccurring the "sanitizeWhitelist:" and "sanitizeFunction:" global options added
  *
  * Changes from 0.6:
  *	- Fixed invalid call to debug in _showNextStep()
@@ -72,6 +76,7 @@
  11. Automagically fixes drawing issues with Bootstrap Selectpicker (https://github.com/snapappointments/bootstrap-select/)
  12. Call onPreviouslyEnded if tour.start() is called for a tour that has previously ended (see docs)
  13. Switch between Bootstrap 3 or 4 (popover template) automatically using tour options
+ 14. Added sanitizeWhitelist and sanitizeFunction global options
 
  --------------
 	1. Control flow from onNext() / onPrevious() options:
@@ -416,7 +421,7 @@
 			tour.start();
 
 ----------------
-	12.	Switch between Bootstrap 3 or 4 (popover template) automatically using tour options, or use a custom template
+	13.	Switch between Bootstrap 3 or 4 (popover template) automatically using tour options, or use a custom template
 		With thanks to this thread: https://github.com/sorich87/bootstrap-tour/pull/643
 
 		Tour is compatible with bootstrap 3 and 4 if the right template is used for the popover. To select the correct template, use the "framework" global option.
@@ -444,8 +449,73 @@
 		To add additional templates, search the code for "PLACEHOLDER: TEMPLATES LOCATION". This will take you to an array that contains the templates, simply edit
 		or add as required.
 
+
+----------------
+	14. Options to manipulate the Bootstrap sanitizer, and fix the sanitizer related breaking change in BS 3.4.x
+		BS 3.4.1 added a sanitizer to popover and tooltips - this breaking change strips non-whitelisted DOM elements from popover content, title etc.
+		See: https://getbootstrap.com/docs/3.4/javascript/#js-sanitizer and https://blog.getbootstrap.com/2019/02/13/bootstrap-4-3-1-and-3-4-1/
+
+		This Bootstrap change resulted in Tour navigation buttons being killed from the DOM: https://github.com/sorich87/bootstrap-tour/issues/723#issuecomment-471107788
+
+		This has been fixed in code, Tour navigation buttons now appear and work by default.
+
+		To prevent future similar reoccurrences, and also allow the manipulation of the sanitizer "allowed list" for Tours that want to add extra content into
+		tour steps, two features added to global options. To understand the purpose and operation of these features, review the following information on the Bootstrap
+		sanitizer: https://getbootstrap.com/docs/3.4/javascript/#js-sanitizer
+
+		--IMPORTANT NOTE-- SECURITY RISK: if you do not understand the purpose of the sanitizer, why it exists in bootstrap or how it relates to Tour, do not use these options.
+
+		Global options:
+
+			sanitizeWhitelist:	specify an object that will be merged with the Bootstrap Popover default whitelist. Use the same structure as the default Bootstrap
+								whitelist.
+
+			sanitizeFunction:	specify a function that will be used to sanitize Tour content, with the following signature: string function(content).
+								Specifying a function for this option will cause sanitizeWhitelist to be ignored.
+								Specifying anything other than a function for this option will be ignored, and sanitizeWhitelist will be used
+
+		Examples:
+
+			Allow tour step content to include a button with attributes data-someplugin1="..." and data-somethingelse="...". Allow content to include a selectpicker.
+				var Tour=new Tour({
+									steps: tourSteps,
+									sanitizeWhitelist:	{
+															"button"	: ["data-someplugin1", "data-somethingelse"],	// allows <button data-someplugin1="abc", data-somethingelse="xyz">
+															"select"	: []											// allows <select>
+														}
+								});
+
+
+			Use a custom whitelist function for sanitizing tour steps:
+				var Tour=new Tour({
+									steps: tourSteps,
+									sanitizeFunction:	function(stepContent)
+														{
+															// Bypass Bootstrap sanitizer using custom function to clean the tour step content.
+															// stepContent will contain the content of the step, i.e.: tourSteps[n].content. You must
+															// clean this content to prevent XSS and other vulnerabilities. Use your own code or a lib like DOMPurify
+															return DOMPurify.sanitize(stepContent);
+														}
+								});
+
+
+			Note: if you have complete control over the tour content (i.e.: no risk of XSS or similar attacks), you can use sanitizeFunction to bypass all sanitization
+				and use your step content exactly as is by simply returning the content:
+
+				var Tour=new Tour({
+									steps: tourSteps,
+									sanitizeFunction:	function(stepContent)
+														{
+															// POTENTIAL SECURITY RISK
+															// bypass Bootstrap sanitizer, perform no sanitization, tour step content will be exactly as templated in tourSteps.
+															return stepContent;
+														}
+								});
+
  *
  */
+
+
 
 (function (window, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -462,6 +532,7 @@
 	var Tour, document, objTemplates;
 
 	document = window.document;
+
 	// SEARCH PLACEHOLDER: TEMPLATES LOCATION
 	objTemplates =	{
 						bootstrap3	: '<div class="popover" role="tooltip"> <div class="arrow"></div> <h3 class="popover-title"></h3> <div class="popover-content"></div> <div class="popover-navigation"> <div class="btn-group"> <button class="btn btn-sm btn-default" data-role="prev">&laquo; Prev</button> <button class="btn btn-sm btn-default" data-role="next">Next &raquo;</button> <button class="btn btn-sm btn-default" data-role="pause-resume" data-pause-text="Pause" data-resume-text="Resume">Pause</button> </div> <button class="btn btn-sm btn-default" data-role="end">End tour</button> </div> </div>',
@@ -501,6 +572,8 @@
 										basePath: '',
 										template: null,
 										framework: 'bootstrap3',
+										sanitizeWhitelist: [],
+										sanitizeFunction: null,// function(content) return sanitizedContent
 										showProgressBar: true,
 										showProgressText: true,
 										getProgressBarHTML: null,//function(percent) {},
@@ -545,11 +618,69 @@
 				this._debug('Using custom template');
 			}
 
-			this._force = false;
-			this._inited = false;
+			if(typeof(this._options.sanitizeFunction) == "function")
+			{
+				this._debug("Using custom sanitize function in place of bootstrap - security implications, be careful");
+			}
+			else
+			{
+				this._options.sanitizeFunction = null;
+
+				this._debug("Extending Bootstrap sanitize options");
+
+				// no custom function, add our own
+				// bootstrap 3.4.1 has whitelist functionality that strips tags from title, content etc of popovers and tooltips. Need to
+				// add buttons to the whitelist otherwise the navigation buttons will be stripped from the popover content.
+				// See issue: https://github.com/sorich87/bootstrap-tour/issues/723#issuecomment-471107788
+				var defaultWhiteList = [];
+				if($.fn.popover.Constructor.DEFAULTS.whiteList !== undefined)
+				{
+					defaultWhiteList = $.fn.popover.Constructor.DEFAULTS.whiteList;
+				}
+
+				var whiteListAdditions = {
+											"button":	["data-role"],
+											"img":		["style"]
+										};
+
+
+				// whitelist is object with properties that are arrays. Need to merge "manually", as using $.extend with recursion will still overwrite the arrays . Try
+				// var whiteList = $.extend(true, {}, defaultWhiteList, whiteListAdditions, this._options.sanitizeWhitelist);
+				// and inspect the img property to see the issue - the default whitelist "src" (array elem 0) is overwritten with additions "style"
+
+				// clone the default whitelist object first, otherwise we change the defaults for all of bootstrap!
+				var whiteList = $.extend(true, {}, defaultWhiteList);
+
+				// iterate the additions, and merge them into the defaults. We could just hammer them in manually but this is a little more expandable for the future
+				$.each(whiteListAdditions,	function( index, value )
+											{
+												if(whiteList[index] == undefined)
+												{
+													whiteList[index] = [];
+												}
+
+												$.merge(whiteList[index], value);
+											});
+
+				// and now do the same with the user specified whitelist in tour options
+				$.each(this._options.sanitizeWhitelist,	function( index, value )
+														{
+															if(whiteList[index] == undefined)
+															{
+																whiteList[index] = [];
+															}
+
+															$.merge(whiteList[index], value);
+														});
+
+				// save the merged whitelist back to the options, this is used by popover initialization when each step is shown
+				this._options.sanitizeWhitelist = whiteList;
+			}
+
 			this._current = null;
 			this.backdrops = [];
-			this;
+
+			return this;
 		}
 
 		Tour.prototype.addSteps = function (steps) {
@@ -652,6 +783,7 @@
 		//=======================================================================================================================================
 		// Initiate tour and movement between steps
 
+
 		Tour.prototype.start = function ()
 		{
 			// Test if this tour has previously ended, and start() was called
@@ -738,8 +870,6 @@
 					$(window).off("resize.tour-" + _this._options.name);
 					$(window).off("scroll.tour-" + _this._options.name);
 					_this._setState('end', 'yes');
-					_this._inited = false;
-					_this._force = false;
 					_this._clearTimer();
 
 					$(window).off("resize");
@@ -1483,6 +1613,9 @@
 									title: title,
 									content: content,
 									html: true,
+									//sanitize: false, // turns off all bootstrap sanitization of popover content, only use in last resort case - use whiteListAdditions instead!
+									whiteList: this._options.sanitizeWhitelist, // ignored if sanitizeFn is specified
+									sanitizeFn: this._options.santizeFunction,
 									animation: step.animation,
 									container: step.container,
 									template: step.template,

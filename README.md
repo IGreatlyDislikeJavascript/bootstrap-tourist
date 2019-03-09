@@ -12,6 +12,15 @@ This repo has been created to give an easy way to update and track the revisions
 
 Tourist automatically works with Bootstrap 3 and 4, however the "standalone" non-Bootstrap version is not available
 
+## Changelog from previous version:
+
+Changes from 0.7:
+	Fast release to fix breaking change in Bootstrap 3.4.1, fixes this issue: https://github.com/sorich87/bootstrap-tour/issues/723#issuecomment-471107788
+	Issue is caused by the BS sanitizer, to avoid this reoccurring the "sanitizeWhitelist:" and "sanitizeFunction:" global options added
+
+Full changelog can be found in the top of bootstrap-tourist.js
+
+
 ## Getting started with Bootstrap Tourist
 Simply include bootstrap-tourist.js and bootstrap-tourist.css into your page. A minified version is not provided because the entire purpose of this repo is to enable fixes, features and native port to ES6. If you are uncomfortable with this, please use the original Bootstrap Tour!
 
@@ -78,6 +87,7 @@ The entire purpose of Tourist is to add features and fixes, and migrate to nativ
  11. Automagically fixes drawing issues with Bootstrap Selectpicker (https://github.com/snapappointments/bootstrap-select/)
  12. Call onPreviouslyEnded if tour.start() is called for a tour that has previously ended (see docs)
  13. Switch between Bootstrap 3 or 4 (popover template) automatically using tour options
+ 14. Added sanitizeWhitelist and sanitizeFunction global options, fixed Bootstrap 3.4.1 breaking change
 
 
 ## Added features & fixes: Documentation
@@ -478,7 +488,7 @@ var Tour=new Tour({
 ```
 
 Review the following logic:
-- If neither template nor framework options are specified, bootstrap3 compatibility is used by default
+- If neither template nor framework options are specified, bootstrap3 compatibility template is used by default
 - If template == null, framework option is used
 - If template != null, template is always used
 - If template == null, and framework option is not literal "bootstrap3" or "bootstrap4", error will occur
@@ -486,6 +496,72 @@ Review the following logic:
 To add additional templates, search the code for "PLACEHOLDER: TEMPLATES LOCATION". This will take you to an array that contains the templates, simply edit
 or add as required.
 
+
+### Options to manipulate the Bootstrap sanitizer, and fix the sanitizer related breaking change in BS 3.4.x
+BS 3.4.1 added a sanitizer to popover and tooltips - this breaking change strips non-whitelisted DOM elements from popover content, title etc.
+See: https://getbootstrap.com/docs/3.4/javascript/#js-sanitizer and https://blog.getbootstrap.com/2019/02/13/bootstrap-4-3-1-and-3-4-1/
+
+This Bootstrap change resulted in Tour navigation buttons being killed from the DOM: https://github.com/sorich87/bootstrap-tour/issues/723#issuecomment-471107788
+
+This has been fixed in code, Tour navigation buttons now appear and work by default.
+
+To prevent future similar reoccurrences, and also allow the manipulation of the sanitizer "allowed list" for Tours that want to add extra content into
+tour steps, two features added to global options. To understand the purpose and operation of these features, review the following information on the Bootstrap
+sanitizer: https://getbootstrap.com/docs/3.4/javascript/#js-sanitizer
+
+--IMPORTANT NOTE-- SECURITY RISK: if you do not understand the purpose of the sanitizer, why it exists in bootstrap or how it relates to Tour, do not use these options.
+
+Global options:
+
+	sanitizeWhitelist:	specify an object that will be merged with the Bootstrap Popover default whitelist. Use the same structure as the default Bootstrap
+						whitelist.
+
+	sanitizeFunction:	specify a function that will be used to sanitize Tour content, with the following signature: string function(content).
+						Specifying a function for this option will cause sanitizeWhitelist to be ignored.
+						Specifying anything other than a function for this option will be ignored, and sanitizeWhitelist will be used
+
+Examples:
+
+Allow tour step content to include a button with attributes data-someplugin1="..." and data-somethingelse="...". Allow content to include a selectpicker.
+
+```
+var Tour=new Tour({
+					steps: tourSteps,
+					sanitizeWhitelist:	{
+											"button"	: ["data-someplugin1", "data-somethingelse"],	// allows <button data-someplugin1="abc", data-somethingelse="xyz">
+											"select"	: []											// allows <select>
+										}
+				});
+```
+
+
+Use a custom whitelist function for sanitizing tour steps:
+```
+var Tour=new Tour({
+					steps: tourSteps,
+					sanitizeFunction:	function(stepContent)
+										{
+											// Bypass Bootstrap sanitizer using custom function to clean the tour step content.
+											// stepContent will contain the content of the step, i.e.: tourSteps[n].content. You must
+											// clean this content to prevent XSS and other vulnerabilities. Use your own code or a lib like DOMPurify
+											return DOMPurify.sanitize(stepContent);
+										}
+				});
+```
+
+Note: if you have complete control over the tour content (i.e.: no risk of XSS or similar attacks), you can use sanitizeFunction to bypass all sanitization and use your step content exactly as is by simply returning the content:
+
+```
+var Tour=new Tour({
+					steps: tourSteps,
+					sanitizeFunction:	function(stepContent)
+										{
+											// POTENTIAL SECURITY RISK
+											// bypass Bootstrap sanitizer, perform no sanitization, tour step content will be exactly as templated in tourSteps.
+											return stepContent;
+										}
+				});
+```
 
 
 ## Contributing
