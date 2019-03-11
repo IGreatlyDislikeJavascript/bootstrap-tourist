@@ -1,6 +1,6 @@
 /* ========================================================================
  *
- * Bootstrap Tourist v0.8
+ * Bootstrap Tourist v0.9
  * Copyright FFS 2019
  * @ IGreatlyDislikeJavascript on Github
  *
@@ -40,7 +40,12 @@
  * limitations under the License.
  * ========================================================================
  *
- * Updated for CS by FFS 2018 - v0.8
+ * Updated for CS by FFS 2018 - v0.9
+ *
+ * Changes from 0.8:
+ *	- The fast fix in v0.7 didn't work for Bootstrap 4. This release is to ensure fully working popovers in BS4. Issue is that the Bootstrap CDN
+ *		doesn't actually have the whitelist property, so developing against it is basically useless :(
+ *	- Improved BS4 support and template switching. Changed options for framework vs template.
  *
  * Changes from 0.7:
  *  - Fast release to fix breaking change in Bootstrap 3.4.1, fixes this issue: https://github.com/sorich87/bootstrap-tour/issues/723#issuecomment-471107788
@@ -75,7 +80,7 @@
  10. Handle bootstrap modal dialogs better - autodetect modals or children of modals, and call onModalHidden to handle when user dismisses modal without following tour steps
  11. Automagically fixes drawing issues with Bootstrap Selectpicker (https://github.com/snapappointments/bootstrap-select/)
  12. Call onPreviouslyEnded if tour.start() is called for a tour that has previously ended (see docs)
- 13. Switch between Bootstrap 3 or 4 (popover template) automatically using tour options
+ 13. Switch between Bootstrap 3 or 4 (popover methods and template) automatically using tour options
  14. Added sanitizeWhitelist and sanitizeFunction global options
 
  --------------
@@ -103,6 +108,7 @@
 
 			var Tour=new Tour({
 								steps: tourSteps,
+								framework: "bootstrap3",	// or "bootstrap4" depending on your version of bootstrap
 								onNext: function(tour)
 										{
 											if(someVar = true)
@@ -203,6 +209,7 @@
 								}
 							];
 			var Tour=new Tour({
+								framework: "bootstrap3",	// or "bootstrap4" depending on your version of bootstrap
 								steps: tourSteps,
 								showProgressBar: true, // default show progress bar
 								showProgressText: true, // default show progress text
@@ -328,6 +335,7 @@
 
 			var Tour=new Tour({
 								steps: tourSteps,
+								framework: "bootstrap3",	// or "bootstrap4" depending on your version of bootstrap
 								onModalHidden: 	function(tour, stepNumber)
 												{
 													console.log("Well damn, this step's element was a modal, or inside a modal, and the modal just done got dismissed y'all. Moving to step 3.");
@@ -412,6 +420,7 @@
 
 			var Tour=new Tour({
 								steps: [ ..... ],
+								framework: "bootstrap3",	// or "bootstrap4" depending on your version of bootstrap
 								onPreviouslyEnded: 	function(tour)
 													{
 														console.log("Looks like this tour has already ended");
@@ -421,14 +430,18 @@
 			tour.start();
 
 ----------------
-	13.	Switch between Bootstrap 3 or 4 (popover template) automatically using tour options, or use a custom template
+	13.	Switch between Bootstrap 3 or 4 (popover methods, template) automatically using tour options, or use a custom template
 		With thanks to this thread: https://github.com/sorich87/bootstrap-tour/pull/643
 
-		Tour is compatible with bootstrap 3 and 4 if the right template is used for the popover. To select the correct template, use the "framework" global option.
+		Tour is compatible with bootstrap 3 and 4 if the right template and framework is used for the popover. Bootstrap3 framework compatibility is used by default.
+
+		To select the correct template and framework, use the "framework" global option. Note this option does more than just select a template, it also changes which
+		methods are used to manage the Tour popovers to be BS3 or BS4 compatible.
 
 			var Tour=new Tour({
 								steps: tourSteps,
-								template: null,			// template option is null by default, but MUST BE SET TO NULL to use the framework option
+								template: null,			// template option is null by default. Tourist will use the appropriate template
+														// for the framework version, in this case BS3 as per next option
 								framework: "bootstrap3", // can be string literal "bootstrap3" or "bootstrap4"
 							});
 
@@ -437,13 +450,14 @@
 
 			var Tour=new Tour({
 								steps: tourSteps,
+								framework: "bootstrap4", // can be string literal "bootstrap3" or "bootstrap4"
 								template: '<div class="popover" role="tooltip">....blah....</div>'
 							});
 
 		Review the following logic:
-			- If template == null, framework option is used
-			- If template != null, template is always used
-			- If template == null, and framework option is not literal "bootstrap3" or "bootstrap4", error will occur
+			- If template == null, default framework template is used based on whether framework is set to "bootstrap3" or "bootstrap4"
+			- If template != null, the specified template is always used
+			- If framework option is not literal "bootstrap3" or "bootstrap4", error will occur
 
 
 		To add additional templates, search the code for "PLACEHOLDER: TEMPLATES LOCATION". This will take you to an array that contains the templates, simply edit
@@ -597,6 +611,12 @@
 										onModalHidden: null, // function(tour, stepNumber) {}
 									}, options);
 
+			if(this._options.framework !== "bootstrap3" && this._options.framework !== "bootstrap4")
+			{
+				this._debug('Invalid framework specified: ' + this._options.framework);
+				throw "Bootstrap Tourist: Invalid framework specified";
+			}
+
 			// template option is default null. If not null after extend, caller has set a custom template, so don't touch it
 			if(this._options.template === null)
 			{
@@ -610,7 +630,7 @@
 				}
 				else
 				{
-					this._debug('Warning: ' + this._options.framework + ' specified for template, but framework is unknown. Tour will not work!');
+					this._debug('Warning: ' + this._options.framework + ' specified for template (no template option set), but framework is unknown. Tour will not work!');
 				}
 			}
 			else
@@ -632,8 +652,20 @@
 				// bootstrap 3.4.1 has whitelist functionality that strips tags from title, content etc of popovers and tooltips. Need to
 				// add buttons to the whitelist otherwise the navigation buttons will be stripped from the popover content.
 				// See issue: https://github.com/sorich87/bootstrap-tour/issues/723#issuecomment-471107788
+				//
+				// ** UPDATE: BS3 and BS4 have the whitelist function. However:
+				//		BS3 uses $.fn.popover.Constructor.DEFAULTS.whiteList
+				//		BS4 uses $.fn.popover.Constructor.Default.whiteList
+				//	Even better, the CDN version of BS4 doesn't seem to include a whitelist property at all, which utterly screwed the first attempt at implementing
+				// this, making it seem like my fix was working when in fact it was utterly broken.
 				var defaultWhiteList = [];
-				if($.fn.popover.Constructor.DEFAULTS.whiteList !== undefined)
+
+				if(this._options.framework == "bootstrap4" && $.fn.popover.Constructor.Default.whiteList !== undefined)
+				{
+					defaultWhiteList = $.fn.popover.Constructor.Default.whiteList;
+				}
+
+				if(this._options.framework == "bootstrap3" && $.fn.popover.Constructor.DEFAULTS.whiteList !== undefined)
 				{
 					defaultWhiteList = $.fn.popover.Constructor.DEFAULTS.whiteList;
 				}
@@ -977,7 +1009,17 @@
 						$element = $('body');
 					}
 
-					$element.popover('destroy').removeClass("tour-" + _this._options.name + "-element tour-" + _this._options.name + "-" + _this.getCurrentStepIndex() + "-element").removeData('bs.popover');
+					if(_this._options.framework == "bootstrap3")
+					{
+						$element.popover('destroy');
+					}
+
+					if(_this._options.framework == "bootstrap4")
+					{
+						$element.popover('dispose');
+					}
+
+					$element.removeClass("tour-" + _this._options.name + "-element tour-" + _this._options.name + "-" + _this.getCurrentStepIndex() + "-element").removeData('bs.popover');
 
 					if (step.reflex)
 					{
@@ -1615,14 +1657,23 @@
 									html: true,
 									//sanitize: false, // turns off all bootstrap sanitization of popover content, only use in last resort case - use whiteListAdditions instead!
 									whiteList: this._options.sanitizeWhitelist, // ignored if sanitizeFn is specified
-									sanitizeFn: this._options.santizeFunction,
+									sanitizeFn: this._options.sanitizeFunction,
 									animation: step.animation,
 									container: step.container,
 									template: step.template,
 									selector: step.element
 								}).popover('show');
 
-				$tip = $element.data('bs.popover') ? $element.data('bs.popover').tip() : $element.data('popover').tip();
+				if(this._options.framework == "bootstrap3")
+				{
+					$tip = $element.data('bs.popover') ? $element.data('bs.popover').tip() : $element.data('popover').tip();
+				}
+
+				if(this._options.framework == "bootstrap4")
+				{
+					$tip = $( ($element.data('bs.popover') ? $element.data('bs.popover').getTipElement() : $element.data('popover').getTipElement() ) );
+				}
+
 				$tip.attr('id', step.id);
 				if ($element.css('position') === 'fixed') {
 					$tip.css('position', 'fixed');

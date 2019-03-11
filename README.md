@@ -10,13 +10,14 @@ The original Bootstrap Tour was written in coffeescript, and had a number of ope
 This repo has been created to give an easy way to update and track the revisions to the code, rather than filling up the original Tour forum.
 
 
-Tourist automatically works with Bootstrap 3 and 4, however the "standalone" non-Bootstrap version is not available
+Tourist works with Bootstrap 3 and 4 (specify "framework" option), however the "standalone" non-Bootstrap version is not available
 
 ## Changelog from previous version:
 
-Changes from 0.7:
-	Fast release to fix breaking change in Bootstrap 3.4.1, fixes this issue: https://github.com/sorich87/bootstrap-tour/issues/723#issuecomment-471107788
-	Issue is caused by the BS sanitizer, to avoid this reoccurring the "sanitizeWhitelist:" and "sanitizeFunction:" global options added
+Changes from 0.8:
+The fast fix in v0.7 didn't work for Bootstrap 4. This release is to ensure fully working popovers in BS4. Issue is that the Bootstrap CDN
+doesn't actually have the whitelist property, so developing against it is basically useless :(
+Improved BS4 support and template switching. Changed options for framework vs template.
 
 Full changelog can be found in the top of bootstrap-tourist.js
 
@@ -58,8 +59,22 @@ If you already have a working tour using Bootstrap Tour, and you want to move to
 
 1. Copy over the Tourist CSS and JS, include them instead of Bootstrap Tour
 2. If you are using Bootstrap 4, add the following option to your initialization code:
+
 ```framework: "bootstrap4"```
+
+For example:
+
+```
+var tour = new Tour({
+						name: "tourist",
+						steps:[...steps go here...],
+						debug: true,	// you may wish to turn on debug for the first run through
+						framework: "bootstrap4", // set Tourist to use BS4 compatibility
+					});	
+```
+
 3. Remove the call to tour.init() - this is not required
+
 4. Add a call to tour.start() to start the tour, and optionally add a call to tour.restart() to force restart the tour
 
 
@@ -119,6 +134,7 @@ var tourSteps = [
 
 var Tour=new Tour({
 					steps: tourSteps,
+					framework: "bootstrap3",	// or "bootstrap4" depending on your version of bootstrap
 					onNext: function(tour)
 							{
 								if(someVar = true)
@@ -228,6 +244,7 @@ var tourSteps = [
 				
 var Tour=new Tour({
 					steps: tourSteps,
+					framework: "bootstrap3",	// or "bootstrap4" depending on your version of bootstrap
 					showProgressBar: true, // default show progress bar
 					showProgressText: true, // default show progress text
 				});
@@ -266,6 +283,7 @@ var tourSteps = [
 				];
 var Tour=new Tour({
 					steps: tourSteps,
+					framework: "bootstrap3",	// or "bootstrap4" depending on your version of bootstrap
 					showProgressBar: true, // default show progress bar
 					showProgressText: true, // default show progress text
 					getProgressBarHTML: 	function(percent)
@@ -367,6 +385,7 @@ element === Bootstrap modal, or element parent === bootstrap modal is automatica
 ```
 var Tour=new Tour({
 					steps: tourSteps,
+					framework: "bootstrap3",	// or "bootstrap4" depending on your version of bootstrap
 					onModalHidden: 	function(tour, stepNumber)
 									{
 										console.log("Well damn, this step's element was a modal, or inside a modal, and the modal just done got dismissed y'all. Moving to step 3.");
@@ -379,6 +398,7 @@ var Tour=new Tour({
 
 var Tour=new Tour({
 					steps: tourSteps,
+					framework: "bootstrap3",	// or "bootstrap4" depending on your version of bootstrap
 					onModalHidden: 	function(tour, stepNumber)
 									{
 										if(validateSomeModalContent() == false)
@@ -455,6 +475,7 @@ the tour really is started or ended.
 ```
 var Tour=new Tour({
 					steps: [ ..... ],
+					framework: "bootstrap3",	// or "bootstrap4" depending on your version of bootstrap
 					onPreviouslyEnded: 	function(tour)
 										{
 											console.log("Looks like this tour has already ended");
@@ -468,13 +489,16 @@ Tour.start();
 ### Switch between Bootstrap 3 or 4 (popover template) automatically using tour options, or use a custom template
 With thanks to this thread: https://github.com/sorich87/bootstrap-tour/pull/643
 
-Tour is compatible with bootstrap 3 and 4 if the right template is used for the popover. To select the correct template, use the "framework" global option.
+Tour is compatible with bootstrap 3 and 4 if the right template and framework is used for the popover. Bootstrap3 framework compatibility is used by default.
+
+To select the correct template and framework, use the "framework" global option. Note this option does more than just select a template, it also changes which methods are used to manage the Tour popovers to be BS3 or BS4 compatible.
 
 ```
 var Tour=new Tour({
 					steps: tourSteps,
-					template: null,			// template option is null by default, but MUST BE SET TO NULL to use the framework option
-					framework: "bootstrap4" // can be string literal "bootstrap3" or "bootstrap4"
+					template: null,			// template option is null by default. Tourist will use the appropriate template
+											// for the framework version, in this case BS3 as per next option
+					framework: "bootstrap3" // can be string literal "bootstrap3" or "bootstrap4"
 				});
 ```
 
@@ -483,15 +507,16 @@ To use a custom template, use the "template" global option:
 ```
 var Tour=new Tour({
 					steps: tourSteps,
+					framework: "bootstrap4",	// or "bootstrap4" depending on your version of bootstrap
 					template: '<div class="popover" role="tooltip">....blah....</div>'
 				});
 ```
 
 Review the following logic:
-- If neither template nor framework options are specified, bootstrap3 compatibility template is used by default
-- If template == null, framework option is used
-- If template != null, template is always used
-- If template == null, and framework option is not literal "bootstrap3" or "bootstrap4", error will occur
+- If template == null, default framework template is used based on whether framework is set to "bootstrap3" or "bootstrap4"
+- If template != null, the specified template is always used
+- If framework option is not literal "bootstrap3" or "bootstrap4", error will occur
+
 
 To add additional templates, search the code for "PLACEHOLDER: TEMPLATES LOCATION". This will take you to an array that contains the templates, simply edit
 or add as required.
@@ -554,6 +579,7 @@ Note: if you have complete control over the tour content (i.e.: no risk of XSS o
 ```
 var Tour=new Tour({
 					steps: tourSteps,
+					framework: "bootstrap3",	// or "bootstrap4" depending on your version of bootstrap
 					sanitizeFunction:	function(stepContent)
 										{
 											// POTENTIAL SECURITY RISK
