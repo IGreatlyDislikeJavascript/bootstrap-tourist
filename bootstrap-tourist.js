@@ -633,9 +633,9 @@
 				// add buttons to the whitelist otherwise the navigation buttons will be stripped from the popover content.
 				// See issue: https://github.com/sorich87/bootstrap-tour/issues/723#issuecomment-471107788
 				var defaultWhiteList = [];
-				if($.fn.popover.Constructor.DEFAULTS.whiteList !== undefined)
+				if($.fn.popover.Constructor.Default.whiteList !== undefined)
 				{
-					defaultWhiteList = $.fn.popover.Constructor.DEFAULTS.whiteList;
+					defaultWhiteList = $.fn.popover.Constructor.Default.whiteList;
 				}
 
 				var whiteListAdditions = {
@@ -977,7 +977,7 @@
 						$element = $('body');
 					}
 
-					$element.popover('destroy').removeClass("tour-" + _this._options.name + "-element tour-" + _this._options.name + "-" + _this.getCurrentStepIndex() + "-element").removeData('bs.popover');
+					$element.popover('dispose').removeClass("tour-" + _this._options.name + "-element tour-" + _this._options.name + "-" + _this.getCurrentStepIndex() + "-element").removeData('bs.popover');
 
 					if (step.reflex)
 					{
@@ -1615,7 +1615,7 @@
 									html: true,
 									//sanitize: false, // turns off all bootstrap sanitization of popover content, only use in last resort case - use whiteListAdditions instead!
 									whiteList: this._options.sanitizeWhitelist, // ignored if sanitizeFn is specified
-									sanitizeFn: this._options.santizeFunction,
+									sanitizeFn: this._options.sanitizeFunction,
 									animation: step.animation,
 									container: step.container,
 									template: step.template,
