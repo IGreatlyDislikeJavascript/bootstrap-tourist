@@ -14,10 +14,12 @@ Tourist works with Bootstrap 3 and 4 (specify "framework" option), however the "
 
 ## Changelog from previous version:
 
-Changes from 0.8:
-The fast fix in v0.7 didn't work for Bootstrap 4. This release is to ensure fully working popovers in BS4. Issue is that the Bootstrap CDN
-doesn't actually have the whitelist property, so developing against it is basically useless :(
-Improved BS4 support and template switching. Changed options for framework vs template.
+Changes from 0.9:
+- smartPlacement option removed, this approach is deprecated. Option will be ignored
+- removed reliance on default function params to ensure compatibility for IE
+- auto progress bar was killed in changes 0.7 -> 0.8 due to Bootstrap sanitizer, this is readded
+- major change to manipulation of BS4 popper.js for orphan steps
+- change to implementation of backdrop creation/positioning
 
 Full changelog can be found in the top of bootstrap-tourist.js
 
