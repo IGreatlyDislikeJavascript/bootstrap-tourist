@@ -592,7 +592,7 @@
 										delay: false,
 										basePath: '',
 										template: null,
-										framework: 'bootstrap3',
+										framework: 'bootstrap4',
 										sanitizeWhitelist: [],
 										sanitizeFunction: null,// function(content) return sanitizedContent
 										showProgressBar: true,
@@ -822,7 +822,10 @@
 
 		//=======================================================================================================================================
 		// Initiate tour and movement between steps
-
+		Tour.prototype.init = function ()
+		{
+			console.log('You should remove Tour.init() from your code. It\'s not required with Bootstrap Tourist');
+		}
 
 		Tour.prototype.start = function ()
 		{
