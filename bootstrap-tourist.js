@@ -116,6 +116,10 @@
 			var Tour=new Tour({
 								steps: tourSteps,
 								framework: "bootstrap3",	// or "bootstrap4" depending on your version of bootstrap
+                buttonTexts:{           // customize or localize button texts
+                  nextButton:"go on",
+                  endTourButton:"ok it's over",
+                }
 								onNext: function(tour)
 										{
 											if(someVar = true)
@@ -550,15 +554,9 @@
 	}
 })(window, function ($) {
 
-	var Tour, document, objTemplates;
+	var Tour, document, objTemplates, objTemplatesButtonTextes;
 
 	document = window.document;
-
-	// SEARCH PLACEHOLDER: TEMPLATES LOCATION
-	objTemplates =	{
-						bootstrap3	: '<div class="popover" role="tooltip"> <div class="arrow"></div> <h3 class="popover-title"></h3> <div class="popover-content"></div> <div class="popover-navigation"> <div class="btn-group"> <button class="btn btn-sm btn-default" data-role="prev">&laquo; Prev</button> <button class="btn btn-sm btn-default" data-role="next">Next &raquo;</button> <button class="btn btn-sm btn-default" data-role="pause-resume" data-pause-text="Pause" data-resume-text="Resume">Pause</button> </div> <button class="btn btn-sm btn-default" data-role="end">End tour</button> </div> </div>',
-						bootstrap4	: '<div class="popover" role="tooltip"> <div class="arrow"></div> <h3 class="popover-header"></h3> <div class="popover-body"></div> <div class="popover-navigation"> <div class="btn-group"> <button class="btn btn-sm btn-outline-secondary" data-role="prev">&laquo; Prev</button> <button class="btn btn-sm btn-outline-secondary" data-role="next">Next &raquo;</button> <button class="btn btn-sm btn-outline-secondary" data-role="pause-resume" data-pause-text="Pause" data-resume-text="Resume">Pause</button> </div> <button class="btn btn-sm btn-outline-secondary" data-role="end">End tour</button> </div> </div>',
-					};
 
 	Tour = (function () {
 
@@ -574,6 +572,7 @@
 				storage = false;
 			}
 
+      
 			// take default options and overwrite with this tour options
 			this._options = $.extend({
 										name: 'tour',
@@ -617,13 +616,33 @@
 										onPreviouslyEnded: null, // function (tour) {},
 										onModalHidden: null, // function(tour, stepNumber) {}
 									}, options);
-
 			if(this._options.framework !== "bootstrap3" && this._options.framework !== "bootstrap4")
 			{
 				this._debug('Invalid framework specified: ' + this._options.framework);
 				throw "Bootstrap Tourist: Invalid framework specified";
 			}
+      
 
+      // create the templates
+      console.log(this._options.objTemplatesButton);
+
+      // CUSTOMIZABLE TEXTES FOR BUTTONS
+      // set defaults
+      objTemplatesButtonTextes = {
+        prevButton: this._options.buttonTexts.prevButton||"Prev",
+        nextButton: this._options.buttonTexts.nextButton||"Next",
+        pauseButton: this._options.buttonTexts.pauseButton||"Pause",
+        resumeButton: this._options.buttonTexts.resumeButton||"Resume",
+        endTourButton: this._options.buttonTexts.endTourButton||"End Tour",    
+      }
+      
+
+      // SEARCH PLACEHOLDER: TEMPLATES LOCATION
+      objTemplates =	{
+        bootstrap3	: '<div class="popover" role="tooltip"> <div class="arrow"></div> <h3 class="popover-title"></h3> <div class="popover-content"></div> <div class="popover-navigation"> <div class="btn-group"> <button class="btn btn-sm btn-default" data-role="prev">&laquo; '+objTemplatesButtonTextes.prevButton+'</button> <button class="btn btn-sm btn-default" data-role="next">'+objTemplatesButtonTextes.nextButton+' &raquo;</button> <button class="btn btn-sm btn-default" data-role="pause-resume" data-pause-text="'+objTemplatesButtonTextes.pauseButton+'" data-resume-text="'+objTemplatesButtonTextes.resumeButton+'">'+objTemplatesButtonTextes.pauseButton+'</button> </div> <button class="btn btn-sm btn-default" data-role="end">'+objTemplatesButtonTextes.endTourButton+'</button> </div> </div>',
+        bootstrap4	: '<div class="popover" role="tooltip"> <div class="arrow"></div> <h3 class="popover-header"></h3> <div class="popover-body"></div> <div class="popover-navigation"> <div class="btn-group"> <button class="btn btn-sm btn-outline-secondary" data-role="prev">&laquo; '+objTemplatesButtonTextes.prevButton+'</button> <button class="btn btn-sm btn-outline-secondary" data-role="next">'+objTemplatesButtonTextes.nextButton+' &raquo;</button> <button class="btn btn-sm btn-outline-secondary" data-role="pause-resume" data-pause-text="'+objTemplatesButtonTextes.pauseButton+'" data-resume-text="'+objTemplatesButtonTextes.resumeButton+'">'+objTemplatesButtonTextes.pauseButton+'</button> </div> <button class="btn btn-sm btn-outline-secondary" data-role="end">'+objTemplatesButtonTextes.endTourButton+'</button> </div> </div>',
+      };
+      
 			// template option is default null. If not null after extend, caller has set a custom template, so don't touch it
 			if(this._options.template === null)
 			{
