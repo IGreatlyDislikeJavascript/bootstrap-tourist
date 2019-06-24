@@ -105,6 +105,7 @@ The entire purpose of Tourist is to add features and fixes, and migrate to nativ
  12. Call onPreviouslyEnded if tour.start() is called for a tour that has previously ended (see docs)
  13. Switch between Bootstrap 3 or 4 (popover template) automatically using tour options
  14. Added sanitizeWhitelist and sanitizeFunction global options, fixed Bootstrap 3.4.1 breaking change
+ 15. Added support for changing button texts 
 
 
 ## Added features & fixes: Documentation
@@ -590,6 +591,34 @@ var Tour=new Tour({
 										}
 				});
 ```
+
+### Change text for the buttons in the popup
+You can now change the text displayed for the buttons used in the tour step popups. 
+For this, there is a new object you can pass to the options, called "localization":
+
+```javascript
+var tour = new Tour({
+						framework: "bootstrap3",	// or "bootstrap4" depending on your version of bootstrap
+						steps:
+						[
+							{
+							element: "#my-element",
+							title: "Title of my step",
+							content: "Content of my step"
+							},
+							{
+							element: "#my-other-element",
+							title: "Title of my step",
+							content: "Content of my step"
+							}
+						],
+						localization:
+						{
+						buttonTexts.nextButton: "Go",
+						buttonTexts.endTourButton: "Ok, enough"
+						}
+					});
+````
 
 
 ## Contributing
