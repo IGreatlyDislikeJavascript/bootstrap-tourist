@@ -158,6 +158,7 @@ Call Tour.restart() to always start Tour from first step
 
 Tour.init() was a redundant method that caused conflict with hidden Tour elements.
 
+As of Tourist v0.11, calling Tour.init() will generate a warning in the console (thanks to @pau1phi11ips).
 
 ### Dynamically determine element by function
 Step "element:" option allows element to be determined programmatically. Return a jquery object.
@@ -198,20 +199,55 @@ If the element specified in the step (static or dynamically determined as per fe
 Function signature: function(tour, stepNumber) {}
 Option is available at global and per step levels.
 
+Use it per step to have a step-specific error handler:
 ```
-function tourBroken(tour, stepNumber)
+function tourStepBroken(tour, stepNumber)
 {
-	alert("Uhoh, tour element is done broke on step number " + stepNumber);
+	alert("Uhoh, the tour broke on the #btnMagic element);
 }
 
 var tourSteps = [
 					{
 						element: "#btnMagic",
-						onElementUnavailable: tourBroken,
+						onElementUnavailable: tourStepBroken,
 						title: "Hold my beer",
 						content: "now watch this"
 					}
 				];
+```
+
+
+Use it globally, and optionally override per step, to have a robust and comprehensive error handler:
+```
+function tourBroken(tour, stepNumber)
+{
+	alert("The default error handler: tour element is done broke on step number " + stepNumber);
+}
+
+var tourSteps = [
+					{
+						element: "#btnThis",
+						//onElementUnavailable: COMMENTED OUT, therefore default global handler used
+						title: "Some button",
+						content: "Some content"
+					},
+					{
+						element: "#btnThat",
+						onElementUnavailable: 	function(tour, stepNumber)
+												{
+													// override the default global handler for this step only
+													alert("The tour broke on #btnThat step");
+												},
+						title: "Another button",
+						content: "More content"
+					}
+				];
+
+var Tour=new Tour({
+					steps: tourSteps,
+					framework: "bootstrap3",	// or "bootstrap4" depending on your version of bootstrap
+					onElementUnavailable: tourBroken, // default "element unavailable" handler for all tour steps
+				});
 ```
 
 
@@ -510,7 +546,7 @@ To use a custom template, use the "template" global option:
 ```
 var Tour=new Tour({
 					steps: tourSteps,
-					framework: "bootstrap4",	// or "bootstrap4" depending on your version of bootstrap
+					framework: "bootstrap4",	// or "bootstrap3" depending on your version of bootstrap
 					template: '<div class="popover" role="tooltip">....blah....</div>'
 				});
 ```
@@ -593,7 +629,7 @@ var Tour=new Tour({
 ```
 
 ### Change text for the buttons in the popup
-You can now change the text displayed for the buttons used in the tour step popups. 
+With thanks to @vneri. You can now change the text displayed for the buttons used in the tour step popups. 
 For this, there is a new object you can pass to the options, called "localization":
 
 ```javascript
@@ -614,8 +650,11 @@ var tour = new Tour({
 						],
 						localization:
 						{
-						buttonTexts.nextButton: "Go",
-						buttonTexts.endTourButton: "Ok, enough"
+							buttonTexts.prevButton: "Back",
+							buttonTexts.nextButton: "Go",
+							buttonTexts.pauseButton: "Wait",
+							buttonTexts.resumeButton: "Continue",
+							buttonTexts.endTourButton: "Ok, enough"						
 						}
 					});
 ````

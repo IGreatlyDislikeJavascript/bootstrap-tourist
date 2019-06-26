@@ -40,11 +40,12 @@
  * limitations under the License.
  * ========================================================================
  *
- * Updated for CS by FFS 2018 - v0.10
+ * Updated for CS by FFS 2018
  *
  *
- * Changes from 1.0:
- *  - added support for changing button texts
+ * Changes from v0.10:
+ *  - added support for changing button texts (thanks to @vneri)
+ *	- added dummy init() to support drop-in replacement for Tour (thanks to @pau1phi11ips)
  *
  * Changes from 0.9:
  *  - smartPlacement option removed, deprecated
@@ -144,6 +145,8 @@
 			Call Tour.restart() to always start Tour from first step
 
 			Tour.init() was a redundant method that caused conflict with hidden Tour elements.
+			
+			As of Tourist v0.11, calling Tour.init() will generate a warning in the console (thanks to @pau1phi11ips).
 
 ---------------
 	3. Dynamically determine element by function
@@ -182,19 +185,52 @@
 			Function signature: function(tour, stepNumber) {}
 			Option is available at global and per step levels.
 
-			function tourBroken(tour, stepNumber)
-			{
-				alert("Uhoh, tour element is done broke on step number " + stepNumber);
-			}
+			Use it per step to have a step-specific error handler:
+				function tourStepBroken(tour, stepNumber)
+				{
+					alert("Uhoh, the tour broke on the #btnMagic element);
+				}
 
-			var tourSteps = [
-								{
-									element: "#btnMagic",
-									onElementUnavailable: tourBroken,
-									title: "Hold my beer",
-									content: "now watch this"
-								}
-							];
+				var tourSteps = [
+									{
+										element: "#btnMagic",
+										onElementUnavailable: tourStepBroken,
+										title: "Hold my beer",
+										content: "now watch this"
+									}
+								];
+
+
+			Use it globally, and optionally override per step, to have a robust and comprehensive error handler:
+				function tourBroken(tour, stepNumber)
+				{
+					alert("The default error handler: tour element is done broke on step number " + stepNumber);
+				}
+
+				var tourSteps = [
+									{
+										element: "#btnThis",
+										//onElementUnavailable: COMMENTED OUT, therefore default global handler used
+										title: "Some button",
+										content: "Some content"
+									},
+									{
+										element: "#btnThat",
+										onElementUnavailable: 	function(tour, stepNumber)
+																{
+																	// override the default global handler for this step only
+																	alert("The tour broke on #btnThat step");
+																},
+										title: "Another button",
+										content: "More content"
+									}
+								];
+
+				var Tour=new Tour({
+									steps: tourSteps,
+									framework: "bootstrap3",	// or "bootstrap4" depending on your version of bootstrap
+									onElementUnavailable: tourBroken, // default "element unavailable" handler for all tour steps
+								});
 
 ---------------
 	6. Scroll flicker / continue reload fixed
@@ -542,6 +578,24 @@
 														}
 								});
 
+----------------
+	15. Change text for the buttons in the popup
+		With thanks to @vneri (https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/pull/8)
+		You can now change the text displayed for the buttons used in the tour step popups.	For this, there is a new object you can pass to the options, called "localization".
+
+			var tour = new Tour({
+									framework: "bootstrap3",	// or "bootstrap4" depending on your version of bootstrap
+									steps:	[ .....	],
+									localization:
+									{
+										buttonTexts.prevButton: "Back",
+										buttonTexts.nextButton: "Go",
+										buttonTexts.pauseButton: "Wait",
+										buttonTexts.resumeButton: "Continue",
+										buttonTexts.endTourButton: "Ok, enough"
+									}
+								});
+		
  *
  */
 
@@ -630,7 +684,7 @@
 
       // create the templates
 
-      // CUSTOMIZABLE TEXTES FOR BUTTONS
+      // CUSTOMIZABLE TEXTS FOR BUTTONS
       // set defaults
       objTemplatesButtonTexts = {
         prevButton: this._options.localization.buttonTexts.prevButton||"Prev",
@@ -846,7 +900,11 @@
 		//=======================================================================================================================================
 		// Initiate tour and movement between steps
 
-
+		Tour.prototype.init = function ()
+		{
+			console.log('You should remove Tour.init() from your code. It\'s not required with Bootstrap Tourist');
+		}
+		
 		Tour.prototype.start = function ()
 		{
 			// Test if this tour has previously ended, and start() was called
