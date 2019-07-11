@@ -2216,7 +2216,7 @@
 				$backdropLeft.offset({top: elementData.offset.top, left: 0});
 
 				var $backdropRight	= $('<div class="tour-backdrop right"></div>');
-				$backdropRight.width(docWidth - elementData.width);
+				$backdropRight.width(docWidth - (elementData.width + elementData.offset.left));
 				$backdropRight.height(elementData.height);
 				$backdropRight.offset({top: elementData.offset.top, left: elementData.offset.left + elementData.width});
 
