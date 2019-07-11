@@ -1740,7 +1740,14 @@
 					}
 					else
 					{
-						title += '<span class="pull-right">' + (i + 1) + '/' + this.getStepCount() + '</span>';
+						if(this._options.framework == "bootstrap3")
+					    {
+							title += '<span class="pull-right">' + (i + 1) + '/' + this.getStepCount() + '</span>';
+					    }
+					    if(this._options.framework == "bootstrap4")
+					    {
+							title += '<span class="float-right">' + (i + 1) + '/' + this.getStepCount() + '</span>';
+					    }
 					}
 				}
 
