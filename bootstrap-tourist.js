@@ -1740,13 +1740,13 @@
 					}
 					else
 					{
-						if(this._options.framework == "bootstrap3")
+					    if(this._options.framework == "bootstrap3")
 					    {
-							title += '<span class="pull-right">' + (i + 1) + '/' + this.getStepCount() + '</span>';
+						title += '<span class="pull-right">' + (i + 1) + '/' + this.getStepCount() + '</span>';
 					    }
 					    if(this._options.framework == "bootstrap4")
 					    {
-							title += '<span class="float-right">' + (i + 1) + '/' + this.getStepCount() + '</span>';
+						title += '<span class="float-right">' + (i + 1) + '/' + this.getStepCount() + '</span>';
 					    }
 					}
 				}
@@ -2223,7 +2223,7 @@
 				$backdropLeft.offset({top: elementData.offset.top, left: 0});
 
 				var $backdropRight	= $('<div class="tour-backdrop right"></div>');
-				$backdropRight.width(docWidth - (elementData.width + elementData.offset.left));
+				$backdropRight.width(docWidth - elementData.width);
 				$backdropRight.height(elementData.height);
 				$backdropRight.offset({top: elementData.offset.top, left: elementData.offset.left + elementData.width});
 
@@ -2231,12 +2231,6 @@
 				$backdropBottom.width(docWidth);
 				$backdropBottom.height(docHeight - elementData.offset.top - elementData.height);
 				$backdropBottom.offset({top: elementData.offset.top + elementData.height, left: 0});
-
-				// check reflex is specifically set to false, if so block the user from interactiving with the element.
-				if (step.reflex === false) 
-				{
-					$backdropLeft.addClass('no-reflex');
-				}
 
 				$(step.backdropContainer).append($backdropTop);
 				$(step.backdropContainer).append($backdropLeft);
