@@ -30,6 +30,15 @@
   opacity: 0.8;
   filter: alpha(opacity=80);
 }
+.tour-backdrop.left.no-reflex::after {
+  content: '';
+  background-color: transparent;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 .tour-prevent {
   position: absolute;
   z-index: 1102;

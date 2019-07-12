@@ -2232,6 +2232,12 @@
 				$backdropBottom.height(docHeight - elementData.offset.top - elementData.height);
 				$backdropBottom.offset({top: elementData.offset.top + elementData.height, left: 0});
 
+				// check reflex is specifically set to false, if so block the user from interactiving with the element.
+				if (step.reflex === false) 
+				{
+					$backdropLeft.addClass('no-reflex');
+				}
+				
 				$(step.backdropContainer).append($backdropTop);
 				$(step.backdropContainer).append($backdropLeft);
 				$(step.backdropContainer).append($backdropRight);
