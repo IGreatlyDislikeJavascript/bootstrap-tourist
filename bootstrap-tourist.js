@@ -1,6 +1,6 @@
 /* ========================================================================
  *
- * Bootstrap Tourist v0.11
+ * Bootstrap Tourist v0.12
  * Copyright FFS 2019
  * @ IGreatlyDislikeJavascript on Github
  *
@@ -18,10 +18,14 @@
  * I'm not a JS coder, so suggest you test very carefully and read the
  * docs (comments) below before using.
  *
+ * If anyone would like to take on the creation of proper docs for
+ * Tourist, please feel free and post here:
+ * https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/issues/15
+ *
  * ========================================================================
  * ENTIRELY BASED UPON:
  *
- * bootstrap-tour - v0.11.0
+ * bootstrap-tour - v0.12.0
  * http://bootstraptour.com
  * ========================================================================
  * Copyright 2012-2015 Ulrich Sossou
@@ -42,6 +46,10 @@
  *
  * Updated for CS by FFS 2018
  *
+ * Changes IN v0.12 FROM v0.11:
+ *	- note version labelling change in this changelog!
+ *  - fixes to the button text change code and better prep for localization (thanks to @DancingDad, @thenewbeat, @bardware)
+ *	- fixed css for BS4 progress text to correctly use float-right (thanks to @macroscian, @thenewbeat)
  *
  * Changes from v0.10:
  *  - added support for changing button texts (thanks to @vneri)
@@ -94,7 +102,7 @@
  12. Call onPreviouslyEnded if tour.start() is called for a tour that has previously ended (see docs)
  13. Switch between Bootstrap 3 or 4 (popover methods and template) automatically using tour options
  14. Added sanitizeWhitelist and sanitizeFunction global options
- 15. Added support for changing button texts 
+ 15. Added support for changing button texts
 
  --------------
 	1. Control flow from onNext() / onPrevious() options:
@@ -145,7 +153,7 @@
 			Call Tour.restart() to always start Tour from first step
 
 			Tour.init() was a redundant method that caused conflict with hidden Tour elements.
-			
+
 			As of Tourist v0.11, calling Tour.init() will generate a warning in the console (thanks to @pau1phi11ips).
 
 ---------------
@@ -242,6 +250,8 @@
 
 ---------------
 	7. Progress bar & progress text:
+			With thanks to @macroscian, @thenewbeat for fixes to this code, incorporated in Tourist v0.12
+
 			Use the following options globally or per step to show tour progress:
 			showProgressBar - shows a bootstrap progress bar for tour progress at the top of the tour content
 			showProgressText - shows a textual progress (N/X, i.e.: 1/24 for slide 1 of 24) in the tour title
@@ -579,23 +589,41 @@
 								});
 
 ----------------
-	15. Change text for the buttons in the popup
-		With thanks to @vneri (https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/pull/8)
+	15. Change text for the buttons in the popup (also, preparation for future localization options)
+		With thanks to @vneri (https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/pull/8) for the original change
+		With thanks to @DancingDad, @thenewbeat, @bardware for the fixes/updates
+
 		You can now change the text displayed for the buttons used in the tour step popups.	For this, there is a new object you can pass to the options, called "localization".
+		This option only applies to the default templates. If you specify your own custom template, the localization.buttonTexts option has no effect on the basis that
+		you will make any changes to your own template directly.
 
 			var tour = new Tour({
 									framework: "bootstrap3",	// or "bootstrap4" depending on your version of bootstrap
 									steps:	[ .....	],
 									localization:
 									{
-										buttonTexts.prevButton: "Back",
-										buttonTexts.nextButton: "Go",
-										buttonTexts.pauseButton: "Wait",
-										buttonTexts.resumeButton: "Continue",
-										buttonTexts.endTourButton: "Ok, enough"
+										buttonTexts:	{
+															prevButton: 'Back',
+															nextButton: 'Go',
+															pauseButton: 'Wait',
+															resumeButton: 'Continue',
+															endTourButton: 'Ok, enough'
+														}
 									}
 								});
-		
+
+		You may specify only the labels you want to change. Unspecified labels will remain at their defaults:
+
+			var tour = new Tour({
+									localization:
+									{
+										buttonTexts:	{
+															endTourButton: 'Adios muchachos'
+														}
+									}
+								});
+
+
  *
  */
 
@@ -631,9 +659,31 @@
 				storage = false;
 			}
 
-      
+			// CUSTOMIZABLE TEXTS FOR BUTTONS
+			// set defaults. We could of course add this to the $.extend({..localization: {} ...}) directly below.
+			// However this is configured here, prior to the $.extend of options below, to enable a potential
+			// future option of loading localization externally perhaps using $.getScript() etc.
+			//
+			// Note that these only affect the "default" templates (see objTemplates in this func below). The assumption is
+			// that if user creates a tour with a custom template, they will name the buttons as required. We could force the
+			// naming even in custom templates by identifying buttons in templates with data-role="...", but it seems more logical
+			// NOT to do that...
+			//
+			// Finally, it's simple to allow different localization/button texts per tour step. To do this, alter the $.extend in
+			// Tour.prototype.getStep() and subsequent code to load the per-step localization, identify the buttons by data-role, and
+			// make the appropriate changes. That seems like a very niche requirement so it's not implemented here.
+			objTemplatesButtonTexts =	{
+											prevButton: "Prev",
+											nextButton: "Next",
+											pauseButton: "Pause",
+											resumeButton: "Resume",
+											endTourButton: "End Tour"
+										};
+
+
 			// take default options and overwrite with this tour options
-			this._options = $.extend({
+			this._options = $.extend(true,
+									{
 										name: 'tour',
 										steps: [],
 										container: 'body',
@@ -650,6 +700,9 @@
 										delay: false,
 										basePath: '',
 										template: null,
+										localization:	{
+															buttonTexts: objTemplatesButtonTexts
+														},
 										framework: 'bootstrap3',
 										sanitizeWhitelist: [],
 										sanitizeFunction: null,// function(content) return sanitizedContent
@@ -675,32 +728,23 @@
 										onPreviouslyEnded: null, // function (tour) {},
 										onModalHidden: null, // function(tour, stepNumber) {}
 									}, options);
+
+
 			if(this._options.framework !== "bootstrap3" && this._options.framework !== "bootstrap4")
 			{
 				this._debug('Invalid framework specified: ' + this._options.framework);
 				throw "Bootstrap Tourist: Invalid framework specified";
 			}
-      
 
-      // create the templates
 
-      // CUSTOMIZABLE TEXTS FOR BUTTONS
-      // set defaults
-      objTemplatesButtonTexts = {
-        prevButton: this._options.localization.buttonTexts.prevButton||"Prev",
-        nextButton: this._options.localization.buttonTexts.nextButton||"Next",
-        pauseButton: this._options.localization.buttonTexts.pauseButton||"Pause",
-        resumeButton: this._options.localization.buttonTexts.resumeButton||"Resume",
-        endTourButton: this._options.localization.buttonTexts.endTourButton||"End Tour",    
-      }
-      
+			// create the templates
 
-      // SEARCH PLACEHOLDER: TEMPLATES LOCATION
-      objTemplates =	{
-        bootstrap3	: '<div class="popover" role="tooltip"> <div class="arrow"></div> <h3 class="popover-title"></h3> <div class="popover-content"></div> <div class="popover-navigation"> <div class="btn-group"> <button class="btn btn-sm btn-default" data-role="prev">&laquo; '+objTemplatesButtonTexts.prevButton+'</button> <button class="btn btn-sm btn-default" data-role="next">'+objTemplatesButtonTexts.nextButton+' &raquo;</button> <button class="btn btn-sm btn-default" data-role="pause-resume" data-pause-text="'+objTemplatesButtonTexts.pauseButton+'" data-resume-text="'+objTemplatesButtonTexts.resumeButton+'">'+objTemplatesButtonTexts.pauseButton+'</button> </div> <button class="btn btn-sm btn-default" data-role="end">'+objTemplatesButtonTexts.endTourButton+'</button> </div> </div>',
-        bootstrap4	: '<div class="popover" role="tooltip"> <div class="arrow"></div> <h3 class="popover-header"></h3> <div class="popover-body"></div> <div class="popover-navigation"> <div class="btn-group"> <button class="btn btn-sm btn-outline-secondary" data-role="prev">&laquo; '+objTemplatesButtonTexts.prevButton+'</button> <button class="btn btn-sm btn-outline-secondary" data-role="next">'+objTemplatesButtonTexts.nextButton+' &raquo;</button> <button class="btn btn-sm btn-outline-secondary" data-role="pause-resume" data-pause-text="'+objTemplatesButtonTexts.pauseButton+'" data-resume-text="'+objTemplatesButtonTexts.resumeButton+'">'+objTemplatesButtonTexts.pauseButton+'</button> </div> <button class="btn btn-sm btn-outline-secondary" data-role="end">'+objTemplatesButtonTexts.endTourButton+'</button> </div> </div>',
-      };
-      
+			// SEARCH PLACEHOLDER: TEMPLATES LOCATION
+			objTemplates = {
+							  bootstrap3	: '<div class="popover" role="tooltip"> <div class="arrow"></div> <h3 class="popover-title"></h3> <div class="popover-content"></div> <div class="popover-navigation"> <div class="btn-group"> <button class="btn btn-sm btn-default" data-role="prev">&laquo; ' + this._options.localization.buttonTexts.prevButton + '</button> <button class="btn btn-sm btn-default" data-role="next">' + this._options.localization.buttonTexts.nextButton + ' &raquo;</button> <button class="btn btn-sm btn-default" data-role="pause-resume" data-pause-text="' + this._options.localization.buttonTexts.pauseButton + '" data-resume-text="' + this._options.localization.buttonTexts.resumeButton + '">' + this._options.localization.buttonTexts.pauseButton + '</button> </div> <button class="btn btn-sm btn-default" data-role="end">' + this._options.localization.buttonTexts.endTourButton + '</button> </div> </div>',
+							  bootstrap4	: '<div class="popover" role="tooltip"> <div class="arrow"></div> <h3 class="popover-header"></h3> <div class="popover-body"></div> <div class="popover-navigation"> <div class="btn-group"> <button class="btn btn-sm btn-outline-secondary" data-role="prev">&laquo; ' + this._options.localization.buttonTexts.prevButton + '</button> <button class="btn btn-sm btn-outline-secondary" data-role="next">' + this._options.localization.buttonTexts.nextButton + ' &raquo;</button> <button class="btn btn-sm btn-outline-secondary" data-role="pause-resume" data-pause-text="' + this._options.localization.buttonTexts.pauseButton + '" data-resume-text="' + this._options.localization.buttonTexts.resumeButton + '">' + this._options.localization.buttonTexts.pauseButton + '</button> </div> <button class="btn btn-sm btn-outline-secondary" data-role="end">' + this._options.localization.buttonTexts.endTourButton + '</button> </div> </div>',
+						  };
+
 			// template option is default null. If not null after extend, caller has set a custom template, so don't touch it
 			if(this._options.template === null)
 			{
@@ -828,6 +872,7 @@
 					this._options.steps[i].element = this._options.steps[i].element();
 				}
 
+				// Set per step options: take the global options then override with this step's options.
 				this._options.steps[i] =  $.extend(true,
 														{
 															id: "step-" + i,
@@ -904,7 +949,7 @@
 		{
 			console.log('You should remove Tour.init() from your code. It\'s not required with Bootstrap Tourist');
 		}
-		
+
 		Tour.prototype.start = function ()
 		{
 			// Test if this tour has previously ended, and start() was called
@@ -1742,11 +1787,11 @@
 					{
 					    if(this._options.framework == "bootstrap3")
 					    {
-						title += '<span class="pull-right">' + (i + 1) + '/' + this.getStepCount() + '</span>';
+							title += '<span class="pull-right">' + (i + 1) + '/' + this.getStepCount() + '</span>';
 					    }
 					    if(this._options.framework == "bootstrap4")
 					    {
-						title += '<span class="float-right">' + (i + 1) + '/' + this.getStepCount() + '</span>';
+							title += '<span class="float-right">' + (i + 1) + '/' + this.getStepCount() + '</span>';
 					    }
 					}
 				}
@@ -1775,7 +1820,7 @@
 					// using the offset feature, which params don't seem to be documented properly!
 					popOpts.offset = function(obj)
 									{
-										console.log(obj);
+										//console.log(obj);
 
 										var top = Math.max(0, ( ($(window).height() - obj.popper.height) / 2) );
 										var left = Math.max(0, ( ($(window).width() - obj.popper.width) / 2) );
