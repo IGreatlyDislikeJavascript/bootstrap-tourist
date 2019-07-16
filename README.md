@@ -14,12 +14,9 @@ Tourist works with Bootstrap 3 and 4 (specify "framework" option), however the "
 
 ## Changelog from previous version:
 
-Changes from 0.9:
-- smartPlacement option removed, this approach is deprecated. Option will be ignored
-- removed reliance on default function params to ensure compatibility for IE
-- auto progress bar was killed in changes 0.7 -> 0.8 due to Bootstrap sanitizer, this is readded
-- major change to manipulation of BS4 popper.js for orphan steps
-- change to implementation of backdrop creation/positioning
+Changes IN v0.12 FROM v0.11:
+- fixes to the button text change code and better prep for localization (thanks to @DancingDad, @thenewbeat, @bardware)
+- fixed css for BS4 progress text to correctly use float-right (thanks to @macroscian, @thenewbeat)
 
 Full changelog can be found in the top of bootstrap-tourist.js
 
@@ -261,6 +258,7 @@ IMPORTANT: orphan steps are stuck to the center of the screen. However steps lin
 
 
 ### Progress bar & progress text:
+With thanks to @macroscian, @thenewbeat for fixes to this code, incorporated in Tourist v0.12
 Use the following options globally or per step to show tour progress:
 showProgressBar - shows a bootstrap progress bar for tour progress at the top of the tour content
 showProgressText - shows a textual progress (N/X, i.e.: 1/24 for slide 1 of 24) in the tour title
@@ -629,35 +627,43 @@ var Tour=new Tour({
 ```
 
 ### Change text for the buttons in the popup
-With thanks to @vneri. You can now change the text displayed for the buttons used in the tour step popups. 
-For this, there is a new object you can pass to the options, called "localization":
+(also, preparation for future localization options)
+With thanks to @vneri (https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/pull/8) for the original change
+With thanks to @DancingDad, @thenewbeat, @bardware for the fixes/updates
+You can now change the text displayed for the buttons used in the tour step popups.	For this, there is a new object you can pass to the options, called "localization".
+This option only applies to the default templates. If you specify your own custom template, the localization.buttonTexts option has no effect on the basis that you will make any changes to your own template directly.
 
-```javascript
+```
 var tour = new Tour({
 						framework: "bootstrap3",	// or "bootstrap4" depending on your version of bootstrap
 						steps:
-						[
-							{
-							element: "#my-element",
-							title: "Title of my step",
-							content: "Content of my step"
-							},
-							{
-							element: "#my-other-element",
-							title: "Title of my step",
-							content: "Content of my step"
-							}
-						],
+						[ .... ],
 						localization:
 						{
-							buttonTexts.prevButton: "Back",
-							buttonTexts.nextButton: "Go",
-							buttonTexts.pauseButton: "Wait",
-							buttonTexts.resumeButton: "Continue",
-							buttonTexts.endTourButton: "Ok, enough"						
+							buttonTexts:	{
+												prevButton: 'Back',
+												nextButton: 'Go',
+												pauseButton: 'Wait',
+												resumeButton: 'Continue',
+												endTourButton: 'Ok, enough'
+											}
 						}
+
 					});
-````
+```
+
+You may specify only the labels you want to change. Unspecified labels will remain at their defaults:
+
+```
+	var tour = new Tour({
+							localization:
+							{
+								buttonTexts:	{
+													endTourButton: 'Adios muchachos'
+												}
+							}
+						});
+```
 
 
 ## Contributing
