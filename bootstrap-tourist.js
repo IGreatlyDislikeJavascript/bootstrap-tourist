@@ -855,8 +855,14 @@
 			return this;
 		};
 
-		Tour.prototype.addStep = function (step) {
-			this._options.steps.push(step);
+		Tour.prototype.addStep = function (step, index) {
+			if (index !== undefined && isNaN(index) === false)
+			{
+				this._options.steps.splice(index, 0, step);
+			}
+			else {
+				this._options.steps.push(step);
+			}
 			return this;
 		};
 
