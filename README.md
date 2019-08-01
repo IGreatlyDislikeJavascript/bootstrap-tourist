@@ -14,9 +14,9 @@ Tourist works with Bootstrap 3 and 4 (specify "framework" option), however the "
 
 ## Changelog from previous version:
 
-Changes IN v0.12 FROM v0.11:
-- fixes to the button text change code and better prep for localization (thanks to @DancingDad, @thenewbeat, @bardware)
-- fixed css for BS4 progress text to correctly use float-right (thanks to @macroscian, @thenewbeat)
+Changes IN v0.2.0:
+- Version update as major fix to bug preventing element: function(){...} feature under BS4/popper.js
+- published as release
 
 Full changelog can be found in the top of bootstrap-tourist.js
 

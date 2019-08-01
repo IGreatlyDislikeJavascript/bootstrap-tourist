@@ -1,6 +1,6 @@
 /* ========================================================================
  *
- * Bootstrap Tourist v0.12
+ * Bootstrap Tourist v0.2.0
  * Copyright FFS 2019
  * @ IGreatlyDislikeJavascript on Github
  *
@@ -25,7 +25,7 @@
  * ========================================================================
  * ENTIRELY BASED UPON:
  *
- * bootstrap-tour - v0.12.0
+ * bootstrap-tour - v0.2.0
  * http://bootstraptour.com
  * ========================================================================
  * Copyright 2012-2015 Ulrich Sossou
@@ -45,6 +45,10 @@
  * ========================================================================
  *
  * Updated for CS by FFS 2018
+ *
+ * Changes in v0.2.0
+ *  - Version update as major fix to bug preventing element: function(){...} feature under BS4/popper.js
+ *  - published as release
  *
  * Changes IN v0.12 FROM v0.11:
  *	- note version labelling change in this changelog!
@@ -1813,25 +1817,39 @@
 									//boundary: "viewport", // added for BS4 popper testing. Do not enable, creates visible jump on orphan step scroll to bottom
 								};
 
-				if(this._options.framework == "bootstrap4" && isOrphan)
+				if(this._options.framework == "bootstrap4")
 				{
-					// BS4 uses popper.js, which doesn't have a method of fixing the popper to the center of the viewport without an element. However
-					// BS4 wrapper does some extra funky stuff that means we can't just replace the BS4 popper init code. Instead, fudge the popper
-					// using the offset feature, which params don't seem to be documented properly!
-					popOpts.offset = function(obj)
-									{
-										//console.log(obj);
+					if(isOrphan)
+					{
+						// BS4 uses popper.js, which doesn't have a method of fixing the popper to the center of the viewport without an element. However
+						// BS4 wrapper does some extra funky stuff that means we can't just replace the BS4 popper init code. Instead, fudge the popper
+						// using the offset feature, which params don't seem to be documented properly!
+						popOpts.offset = function(obj)
+										{
+											//console.log(obj);
 
-										var top = Math.max(0, ( ($(window).height() - obj.popper.height) / 2) );
-										var left = Math.max(0, ( ($(window).width() - obj.popper.width) / 2) );
+											var top = Math.max(0, ( ($(window).height() - obj.popper.height) / 2) );
+											var left = Math.max(0, ( ($(window).width() - obj.popper.width) / 2) );
 
-										obj.popper.position="fixed";
-										obj.popper.top = top;
-										obj.popper.bottom = top + obj.popper.height;
-										obj.popper.left = left;
-										obj.popper.right = top + obj.popper.width;
-										return obj;
-									}
+											obj.popper.position="fixed";
+											obj.popper.top = top;
+											obj.popper.bottom = top + obj.popper.height;
+											obj.popper.left = left;
+											obj.popper.right = top + obj.popper.width;
+											return obj;
+										}
+					}
+					else
+					{
+						// BS3 popover accepts jq object or string literal. BS4 popper.js of course doesn't, just to make life extra irritating.
+						popOpts.selector = "#" + step.element[0].id;
+					}
+				}
+
+				// BS4 / popper.js does not accept a jquery object as element. BS3 popover does!
+				if(this._options.framework == "bootstrap4" && isOrphan == false)
+				{
+					popOpts.selector = "#" + step.element[0].id;
 				}
 
 				$element.popover(popOpts);
