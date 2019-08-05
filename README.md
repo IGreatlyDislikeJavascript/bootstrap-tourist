@@ -361,12 +361,14 @@ dropdown after clicking.
 Use delayOnElement to instruct Tour to wait for **ANY** element to appear before showing the step (or crapping out due to missing element). Yes this means the tour step element can be one DOM
 element, but the delay will wait for a completely separate DOM element to appear. This is really useful for hidden divs etc.
 Use in conjunction with onElementUnavailable for robust tour step handling.
+By default this element must be present in DOM, but it should be hidden. If you want to wait for a new element to appear, use the `includeHidden` option.
 
 delayOnElement is an object with the following:
 ```
 				delayOnElement: {
 									delayElement: "#waitForMe", // the element to wait to become visible, or the string literal "element" to use the step element
-									maxDelay: 2000, // optional milliseconds to wait/timeout for the element, before crapping out. If maxDelay is not specified, this is 2000ms by default
+									maxDelay: 2000, // optional milliseconds to wait/timeout for the element, before crapping out. If maxDelay is not specified, this is 2000ms by default,
+									includeHidden: false // optional, false if the element is already in the page, or true if the element will appear later
 								}
 ```
 
