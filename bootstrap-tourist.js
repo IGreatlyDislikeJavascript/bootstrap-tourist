@@ -350,7 +350,7 @@
 			delayOnElement is an object with the following:
 							delayOnElement: {
 												delayElement: "#waitForMe", // the element to wait to become visible, or the string literal "element" to use the step element
-												maxDelay: 2000, // optional milliseconds to wait/timeout for the element, before crapping out. If maxDelay is not specified, this is 2000ms by default
+												maxDelay: 2000 // optional milliseconds to wait/timeout for the element, before crapping out. If maxDelay is not specified, this is 2000ms by default,
 											}
 
 			var tourSteps = [
@@ -1401,51 +1401,52 @@
 					var delayFunc = null;
 					var _this = this;
 
-					if(typeof(step.delayOnElement.delayElement) == "function")
-						$delayElement = step.delayOnElement.delayElement();
-					else if(step.delayOnElement.delayElement == "element")
-						$delayElement = $(step.element);
-					else
-						$delayElement = $(step.delayOnElement.delayElement);
+					var revalidateDelayElement = function() {
+						if(typeof(step.delayOnElement.delayElement) == "function")
+							return step.delayOnElement.delayElement();
+						else if(step.delayOnElement.delayElement == "element")
+							return $(step.element);
+						else
+							return $(step.delayOnElement.delayElement);
+					};
+					var $delayElement = revalidateDelayElement();
+					
+					var delayElementLog = $delayElement.length > 0 ? $delayElement[0].tagName : step.delayOnElement.delayElement;
 
-					if($delayElement.length > 0)
-					{
-						var delayMax = (step.delayOnElement.maxDelay ? step.delayOnElement.maxDelay : 2000);
-						this._debug("Wait for element " + $delayElement[0].tagName + " visible or max " + delayMax + " milliseconds to show the step " + (this._current + 1));
+					var delayMax = (step.delayOnElement.maxDelay ? step.delayOnElement.maxDelay : 2000);
+					this._debug("Wait for element " + delayElementLog + " visible or max " + delayMax + " milliseconds to show the step " + (this._current + 1));
 
-						delayFunc = window.setInterval(	function()
+					delayFunc = window.setInterval(	function()
+													{
+														_this._debug("Wait for element " + delayElementLog + ": checking...");
+														if($delayElement.length === 0) {
+															$delayElement = revalidateDelayElement();
+														}
+														if($delayElement.is(':visible'))
 														{
-															_this._debug("Wait for element " + $delayElement[0].tagName + ": checking...");
-															if($delayElement.is(':visible'))
-															{
-																_this._debug("Wait for element " + $delayElement[0].tagName + ": found, showing step");
-																window.clearInterval(delayFunc);
-																delayFunc = null;
-																return _this._callOnPromiseDone(promise, showStepHelper);
-															}
-														}, 250);
+															_this._debug("Wait for element " + delayElementLog + ": found, showing step");
+															window.clearInterval(delayFunc);
+															delayFunc = null;
+															return _this._callOnPromiseDone(promise, showStepHelper);
+														}
+													}, 250);
 
-						//	set max delay to greater than default interval check for element appearance
-						if(delayMax < 250)
-							delayMax = 251;
+					//	set max delay to greater than default interval check for element appearance
+					if(delayMax < 250)
+						delayMax = 251;
 
-						// Set timer to kill the setInterval call after max delay time expires
-						window.setTimeout(	function ()
+					// Set timer to kill the setInterval call after max delay time expires
+					window.setTimeout(	function ()
+										{
+											if(delayFunc)
 											{
-												if(delayFunc)
-												{
-													_this._debug("Wait for element " + $delayElement[0].tagName + ": max timeout reached without element found");
-													window.clearInterval(delayFunc);
+												_this._debug("Wait for element " + delayElementLog + ": max timeout reached without element found");
+												window.clearInterval(delayFunc);
 
-													// showStepHelper will handle broken/missing/invisible element
-													return _this._callOnPromiseDone(promise, showStepHelper);
-												}
-											}, delayMax);
-					}
-					else
-					{
-						this._debug("Error - delayOnElement given invalid element " + step.delayOnElement.delayElement + " on step " + (this._current + 1));
-					}
+												// showStepHelper will handle broken/missing/invisible element
+												return _this._callOnPromiseDone(promise, showStepHelper);
+											}
+										}, delayMax);
 				}
 				else
 				{
