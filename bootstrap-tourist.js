@@ -1413,40 +1413,40 @@
 					
 					var delayElementLog = $delayElement.length > 0 ? $delayElement[0].tagName : step.delayOnElement.delayElement;
 
-						var delayMax = (step.delayOnElement.maxDelay ? step.delayOnElement.maxDelay : 2000);
-						this._debug("Wait for element " + delayElementLog + " visible or max " + delayMax + " milliseconds to show the step " + (this._current + 1));
+					var delayMax = (step.delayOnElement.maxDelay ? step.delayOnElement.maxDelay : 2000);
+					this._debug("Wait for element " + delayElementLog + " visible or max " + delayMax + " milliseconds to show the step " + (this._current + 1));
 
-						delayFunc = window.setInterval(	function()
+					delayFunc = window.setInterval(	function()
+													{
+														_this._debug("Wait for element " + delayElementLog + ": checking...");
+														if($delayElement.length === 0) {
+															$delayElement = revalidateDelayElement();
+														}
+														if($delayElement.is(':visible'))
 														{
-															_this._debug("Wait for element " + delayElementLog + ": checking...");
-															if($delayElement.length === 0) {
-																$delayElement = revalidateDelayElement();
-															}
-															if($delayElement.is(':visible'))
-															{
-																_this._debug("Wait for element " + delayElementLog + ": found, showing step");
-																window.clearInterval(delayFunc);
-																delayFunc = null;
-																return _this._callOnPromiseDone(promise, showStepHelper);
-															}
-														}, 250);
+															_this._debug("Wait for element " + delayElementLog + ": found, showing step");
+															window.clearInterval(delayFunc);
+															delayFunc = null;
+															return _this._callOnPromiseDone(promise, showStepHelper);
+														}
+													}, 250);
 
-						//	set max delay to greater than default interval check for element appearance
-						if(delayMax < 250)
-							delayMax = 251;
+					//	set max delay to greater than default interval check for element appearance
+					if(delayMax < 250)
+						delayMax = 251;
 
-						// Set timer to kill the setInterval call after max delay time expires
-						window.setTimeout(	function ()
+					// Set timer to kill the setInterval call after max delay time expires
+					window.setTimeout(	function ()
+										{
+											if(delayFunc)
 											{
-												if(delayFunc)
-												{
-													_this._debug("Wait for element " + delayElementLog + ": max timeout reached without element found");
-													window.clearInterval(delayFunc);
+												_this._debug("Wait for element " + delayElementLog + ": max timeout reached without element found");
+												window.clearInterval(delayFunc);
 
-													// showStepHelper will handle broken/missing/invisible element
-													return _this._callOnPromiseDone(promise, showStepHelper);
-												}
-											}, delayMax);
+												// showStepHelper will handle broken/missing/invisible element
+												return _this._callOnPromiseDone(promise, showStepHelper);
+											}
+										}, delayMax);
 				}
 				else
 				{
