@@ -356,19 +356,25 @@ var tourSteps = [
 
 
 ### Wait for an element to appear before continuing tour
-Sometimes a tour step element might not be immediately ready because of transition effects etc. This is a specific issue with bootstrap select, which is relatively slow to show the selectpicker
-dropdown after clicking.
-Use delayOnElement to instruct Tour to wait for **ANY** element to appear before showing the step (or crapping out due to missing element). Yes this means the tour step element can be one DOM
-element, but the delay will wait for a completely separate DOM element to appear. This is really useful for hidden divs etc.
-Use in conjunction with onElementUnavailable for robust tour step handling.
-By default this element must be present in DOM, but it should be hidden. If you want to wait for a new element to appear, use the `includeHidden` option.
+With thanks to @lukaszmn for adding functionality to wait for elements not yet added to the DOM
 
-delayOnElement is an object with the following:
+Sometimes a tour step element might not be immediately ready because of transition effects etc. This is a specific issue with bootstrap select, which is relatively slow to show the selectpicker
+dropdown after clicking. 
+
+A step element might also not be visible because it does not exist in the DOM yet, because it hasn't been created by another plugin or your code.
+
+Use delayOnElement to instruct Tour to wait for **ANY** element to appear (== become visible) in the DOM before showing the step (or crapping out due to missing element). This means the tour step element can be one DOM
+element, but the delay will wait for a completely separate DOM element to appear. This is really useful for hidden divs etc. 
+
+Use in conjunction with onElementUnavailable for robust tour step handling. If delayOnElement.maxDelay timeout is reached, Tourist will call onElementUnavailable function as defined in the step or globally. If
+onElementUnavailable is not defined for the step or globally, the step will be skipped.
+
+
+delayOnElement is an object with the following signature:
 ```
 				delayOnElement: {
 									delayElement: "#waitForMe", // the element to wait to become visible, or the string literal "element" to use the step element
 									maxDelay: 2000, // optional milliseconds to wait/timeout for the element, before crapping out. If maxDelay is not specified, this is 2000ms by default,
-									includeHidden: false // optional, false if the element is already in the page, or true if the element will appear later
 								}
 ```
 
@@ -386,7 +392,7 @@ var tourSteps = [
 					{
 						element: "#inputUnrelated",
 						delayOnElement:	{
-											delayElement: "#divStuff" // wait until DOM element "divStuff" is visible before showing this tour step against DOM element "inputUnrelated"
+											delayElement: "#divStuff" // wait until DOM element "divStuff" is visible or added to the DOM before showing this tour step against DOM element "inputUnrelated"
 										},
 						title: "Waiting",
 						content: "This input is nice, but you only see this step when the other div appears"
