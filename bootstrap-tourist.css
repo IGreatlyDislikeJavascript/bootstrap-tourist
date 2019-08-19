@@ -23,22 +23,50 @@
  * ========================================================================
  */
 
-.tour-backdrop {
+ .tour-backdrop {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  /*position: fixed;*/
   position: absolute;
-  z-index: 1100;
+  box-sizing: content-box;
+  z-index: 1110;
   background-color: #000;
-  opacity: 0.8;
-  filter: alpha(opacity=80);
+  opacity: 0;
+  -ms-filter: "alpha(opacity=50)";
+  filter: alpha(opacity=50);
+  -webkit-transition: all .3s ease-out;
+  -moz-transition: all .3s ease-out;
+  -ms-transition: all .3s ease-out;
+  -o-transition: all .3s ease-out;
+  transition: all .3s ease-out;
 }
 .tour-prevent {
+position: absolute;
+z-index: 1112;
+background-color: #ccc;
+opacity: 0.20;
+filter: alpha(opacity=20);
+}
+.tour-highlight {
+  box-sizing: content-box;
   position: absolute;
-  z-index: 1102;
-  background-color: #ccc;
-  opacity: 0.20;
-  filter: alpha(opacity=20);
+  z-index: 1110;
+  background-color: #FFF;
+  background-color: rgba(255,255,255,.9);
+  -webkit-transition: all .3s ease-out;
+  -moz-transition: all .3s ease-out;
+  -ms-transition: all .3s ease-out;
+  -o-transition: all .3s ease-out;
+  transition: all .3s ease-out;
+}
+.highlight-element {
+  position: relative;
+  z-index: 1111;
 }
 .popover[class*="tour-"] {
-  z-index: 1110;
+  z-index: 1113;
 }
 .popover[class*="tour-"] .popover-navigation {
   padding: 9px 14px;

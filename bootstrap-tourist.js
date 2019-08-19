@@ -2276,30 +2276,16 @@
 					elementData = this._applyBackdropPadding(step.backdropPadding, elementData);
 				}
 
-				var $backdropTop	= $('<div class="tour-backdrop top"></div>');
-				$backdropTop.offset({top: 0, left: 0});
-				$backdropTop.width(docWidth);
-				$backdropTop.height(elementData.offset.top);
+				var $backdropTop	= $('<div class="tour-backdrop"></div>');
 
-				var $backdropLeft	= $('<div class="tour-backdrop left"></div>');
-				$backdropLeft.width(elementData.offset.left);
-				$backdropLeft.height(elementData.height);
-				$backdropLeft.offset({top: elementData.offset.top, left: 0});
+                $(step.backdropContainer).append($backdropTop);
 
-				var $backdropRight	= $('<div class="tour-backdrop right"></div>');
-				$backdropRight.width(docWidth - (elementData.width + elementData.offset.left));
-				$backdropRight.height(elementData.height);
-				$backdropRight.offset({top: elementData.offset.top, left: elementData.offset.left + elementData.width});
-
-				var $backdropBottom = $('<div class="tour-backdrop bottom"></div>');
-				$backdropBottom.width(docWidth);
-				$backdropBottom.height(docHeight - elementData.offset.top - elementData.height);
-				$backdropBottom.offset({top: elementData.offset.top + elementData.height, left: 0});
-
-				$(step.backdropContainer).append($backdropTop);
-				$(step.backdropContainer).append($backdropLeft);
-				$(step.backdropContainer).append($backdropRight);
-				$(step.backdropContainer).append($backdropBottom);
+                $(step.backdropContainer).append("<div class='tour-highlight' id='tourHighlight'></div>");
+                $("#tourHighlight").width($(step.element).outerWidth());
+                $("#tourHighlight").height($(step.element).outerHeight());
+                $("#tourHighlight").offset($(step.element).offset());
+                $(step.element).addClass('highlight-element');
+                $(".tour-backdrop").css('opacity', '0.2');
 			}
 		};
 
@@ -2312,6 +2298,8 @@
 			}
 
 			$(".tour-backdrop").remove();
+            $(".tour-highlight").remove();
+            $(step.element).removeClass('highlight-element');
 		};
 
 		Tour.prototype._applyBackdropPadding = function (padding, data)
