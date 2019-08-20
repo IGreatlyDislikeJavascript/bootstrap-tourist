@@ -46,6 +46,10 @@
  *
  * Updated for CS by FFS 2018
  *
+ * Changes in v0.2.1
+ *  - Reworked backdrop function adding highlight box to allow backdrop remain in view when navgiating between steps
+ *  - published as release
+ *
  * Changes in v0.2.0
  *  - Version update as major fix to bug preventing element: function(){...} feature under BS4/popper.js
  *  - published as release
@@ -2309,7 +2313,6 @@
 			    
 			    $("#tourPrevent").width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
                 $("#tourPrevent").show();
-			    //$("#tourPrevent").css({"width": "10px","height": "0","top": "0","left": "0"});
 			}
 
 		};
@@ -2319,7 +2322,7 @@
 
             $(step.element).removeClass('highlight-element');
 			$("#tourPrevent").css({"width": "0","height": "0","top": "0","left": "0"});
-             $("#tourPrevent").hide();
+            $("#tourPrevent").hide();
 
 		};
 
