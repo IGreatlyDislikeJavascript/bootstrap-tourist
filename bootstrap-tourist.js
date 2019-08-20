@@ -2213,7 +2213,7 @@
 			{
 				this._debug("Fixing Bootstrap SelectPicker");
 				// set zindex to open dropdown over background element
-				$selectpicker.parent().css("z-index", "1101");
+				$selectpicker.parent().css("z-index", "1113");
 
 				// store the element for other calls. Mainly for when step is hidden, selectpicker must be unfixed / z index reverted to avoid visual issues.
 				// storing element means we don't need to find it again later
