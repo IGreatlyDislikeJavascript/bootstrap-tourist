@@ -976,6 +976,7 @@
 			// from first step. This provides the "resume tour" functionality.
 			// Tour restart() simply removes the step from local storage
 			this.setCurrentStep();
+            this._createBackdrop();
 
 			this._initMouseNavigation();
 			this._initKeyboardNavigation();
@@ -1007,6 +1008,7 @@
 			// start the tour - see if user provided onStart function, and if it returns a promise, obey that promise before calling showStep
 			var promise = this._makePromise(this._options.onStart != null ? this._options.onStart(this) : void 0);
 			this._callOnPromiseDone(promise, this.showStep, this._current);
+
 
 			return this;
 		};
@@ -1041,6 +1043,7 @@
 					$(window).off("scroll.tour-" + _this._options.name);
 					_this._setState('end', 'yes');
 					_this._clearTimer();
+                    _this._hideBackdrop(step);
 
 					if (_this._options.onEnd != null)
 					{
@@ -1163,7 +1166,7 @@
 						$(step.reflexElement).removeClass('tour-step-element-reflex').off((_this._reflexEvent(step.reflex)) + ".tour-" + _this._options.name);
 					}
 
-					_this._hideOverlayElement(step);
+                    _this._hideOverlayElement(step);
 					_this._unfixBootstrapSelectPickerZindex(step);
 
 					// If this step was pointed at a modal, revert changes to the step.element. See the notes in showStep for explanation
@@ -1674,7 +1677,7 @@
 		Tour.prototype._isOrphan = function (step)
 		{
 			var isOrphan = (step.orphan == true) || (step.element == null) || !$(step.element).length || $(step.element).is(':hidden') && ($(step.element)[0].namespaceURI !== 'http://www.w3.org/2000/svg');
-
+            
 			return isOrphan;
 		};
 
@@ -1696,7 +1699,13 @@
 
 			if (step.backdrop)
 			{
+				this._positionBackdrop(step);
 				this._showOverlayElements(step);
+			}
+            else
+			{
+				this._hideBackdrop(step);
+				this._hideOverlayElement(step);
 			}
 
 			this._fixBootstrapSelectPickerZindex(step);
@@ -2210,7 +2219,7 @@
 				// storing element means we don't need to find it again later
 				this._setStepFlag(this.getCurrentStepIndex(), "elementBootstrapSelectpicker", $selectpicker);
 			}
-		}
+		};
 
 		// Revert the Z index between Tour overlay and popoper
  		Tour.prototype._unfixBootstrapSelectPickerZindex = function(step)
@@ -2222,12 +2231,63 @@
 				// set zindex to open dropdown over background element
 				$selectpicker.parent().css("z-index", "auto");
 			}
-		}
+		};
 
-		// Shows the preventInteraction div, and the background divs
+		Tour.prototype._createBackdrop = function ()
+        {
+            var elementData;
+            step = this.getStep(this._current);
+
+			var $backdrop = $('<div class="tour-backdrop"></div>');
+            var $highlight = $('<div class="tour-highlight" id="tourHighlight" style="width:0px;height:0px;top:0px;left:0px;"></div>');
+            var $preventDiv = $('<div class="tour-prevent" id="tourPrevent" style="width:0px;height:0px;top:0px;left:0px;"></div>');
+            var $debug = $('<!-- debug -->');
+
+            if ($(".tour-backdrop").length === 0) 
+            {
+                $("body").append($backdrop);
+            }
+            if ($("#tourHighlight").length === 0) 
+            {
+                $("body").append($highlight);
+            }
+            if ($("#tourPrevent").length === 0) 
+            {
+                $("body").append($preventDiv);
+            }
+
+        };
+
+		Tour.prototype._hideBackdrop = function ()
+        {
+            step = this.getStep(this._current);
+
+            $("#tourHighlight").width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
+            $("#tourHighlight").hide();
+            $(".tour-backdrop").hide();
+
+        };
+
+		Tour.prototype._positionBackdrop = function ()
+        {
+            step = this.getStep(this._current);
+      
+            $(step.element).addClass('highlight-element');
+            $(".tour-backdrop").show().css("opacity", "0.2");
+            $("#tourHighlight").show().width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
+
+            if (this._isOrphan(step))
+			{
+				$('#tourHighlight').hide();
+			}
+        };
+
+		// Shows the preventInteraction div, highlights and backdrop div
 		Tour.prototype._showOverlayElements = function (step) {
 			var elementData,
-				isRedraw;
+                isRedraw;
+
+            $(step.element).addClass('highlight-element');
 
 			// check if the popover for the current step already exists (is this a redraw)
 			if($(document).find(".popover.tour-" + this._options.name + ".tour-" + this._options.name + "-" + this.getCurrentStepIndex()).length == 0)
@@ -2244,62 +2304,23 @@
 				return;
 			}
 
-			if(step.preventInteraction && !isRedraw)
+            if (step.preventInteraction && !isRedraw)
 			{
-				$(step.backdropContainer).append("<div class='tour-prevent' id='tourPrevent'></div>");
-				$("#tourPrevent").width($(step.element).outerWidth());
-				$("#tourPrevent").height($(step.element).outerHeight());
-				$("#tourPrevent").offset($(step.element).offset());
+			    
+			    $("#tourPrevent").width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
+                $("#tourPrevent").show();
+			    //$("#tourPrevent").css({"width": "10px","height": "0","top": "0","left": "0"});
 			}
 
-			docHeight = $(document).height();
-			docWidth = $(document).width();
-
-			if ($(step.element).length === 0 || this._isOrphan(step))
-			{
-				var $backdrop = $('<div class="tour-backdrop tour-backdrop-orphan"></div>');
-				$backdrop.offset({top: 0, left: 0});
-				$backdrop.width(docWidth);
-				$backdrop.height(docHeight);
-				$("body").append($backdrop);
-			}
-			else
-			{
-				elementData =	{
-									width: $(step.element).innerWidth(),
-									height: $(step.element).innerHeight(),
-									offset: $(step.element).offset()
-								};
-
-				if (step.backdropPadding)
-				{
-					elementData = this._applyBackdropPadding(step.backdropPadding, elementData);
-				}
-
-				var $backdropTop	= $('<div class="tour-backdrop"></div>');
-
-                $(step.backdropContainer).append($backdropTop);
-
-                $(step.backdropContainer).append("<div class='tour-highlight' id='tourHighlight'></div>");
-                $("#tourHighlight").width($(step.element).outerWidth());
-                $("#tourHighlight").height($(step.element).outerHeight());
-                $("#tourHighlight").offset($(step.element).offset());
-                $(step.element).addClass('highlight-element');
-                $(".tour-backdrop").css('opacity', '0.2');
-			}
 		};
 
 		Tour.prototype._hideOverlayElement = function (step)
 		{
-			// remove any previous interaction overlay
-			if($("#tourPrevent").length)
-			{
-				$("#tourPrevent").remove();
-			}
 
-			$(".tour-backdrop").remove();
-            $(".tour-highlight").remove();
             $(step.element).removeClass('highlight-element');
+			$("#tourPrevent").css({"width": "0","height": "0","top": "0","left": "0"});
+             $("#tourPrevent").hide();
+
 		};
 
 		Tour.prototype._applyBackdropPadding = function (padding, data)
