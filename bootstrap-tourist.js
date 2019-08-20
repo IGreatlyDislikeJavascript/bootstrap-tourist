@@ -1013,7 +1013,6 @@
 			var promise = this._makePromise(this._options.onStart != null ? this._options.onStart(this) : void 0);
 			this._callOnPromiseDone(promise, this.showStep, this._current);
 
-
 			return this;
 		};
 
@@ -1685,7 +1684,6 @@
 			return isOrphan;
 		};
 
-
 		Tour.prototype._isLast = function () {
 			return this._current < this._options.steps.length - 1;
 		};
@@ -2289,7 +2287,7 @@
 		// Shows the preventInteraction div, highlights and backdrop div
 		Tour.prototype._showOverlayElements = function (step) {
 			var elementData,
-                isRedraw;
+                    isRedraw;
 
             $(step.element).addClass('highlight-element');
 
