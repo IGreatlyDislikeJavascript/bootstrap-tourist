@@ -856,11 +856,22 @@
 		};
 
 		Tour.prototype.addStep = function (step, index) {
-			if (index !== undefined && isNaN(index) === false)
+			if (index !== undefined && isNaN(index) === false) 
 			{
-				this._options.steps.splice(index, 0, step);
-			}
-			else {
+				if ((this._current === null && index <= this._options.steps.length) || 
+					(this._current !== null && index > this._current && index <= this._options.steps.length)) 
+				{
+					this._options.steps.splice(index, 0, step);
+				} 
+				else if (this._current !== null && index === this._current) 
+				{
+					this.hideStep();
+					this._options.steps.splice(index, 0, step);
+					this.showStep(index);
+				}
+			} 
+			else 
+			{
 				this._options.steps.push(step);
 			}
 			return this;
