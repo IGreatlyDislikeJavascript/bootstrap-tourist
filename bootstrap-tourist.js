@@ -1,6 +1,6 @@
 /* ========================================================================
  *
- * Bootstrap Tourist v0.2.0
+ * Bootstrap Tourist v0.2.1
  * Copyright FFS 2019
  * @ IGreatlyDislikeJavascript on Github
  *
@@ -45,6 +45,9 @@
  * ========================================================================
  *
  * Updated for CS by FFS 2018
+ *
+ * Changes in v0.2.1
+ * 	- delayOnElement option now waits for elements not yet created in the DOM (thanks to @lukaszmn)
  *
  * Changes in v0.2.0
  *  - Version update as major fix to bug preventing element: function(){...} feature under BS4/popper.js
@@ -341,11 +344,18 @@
 
 ----------------
 	9. Wait for an element to appear before continuing tour
+			With thanks to @lukaszmn for adding functionality to wait for elements not yet added to the DOM
+
 			Sometimes a tour step element might not be immediately ready because of transition effects etc. This is a specific issue with bootstrap select, which is relatively slow to show the selectpicker
-			dropdown after clicking.
-			Use delayOnElement to instruct Tour to wait for **ANY** element to appear before showing the step (or crapping out due to missing element). Yes this means the tour step element can be one DOM
-			element, but the delay will wait for a completely separate DOM element to appear. This is really useful for hidden divs etc.
-			Use in conjunction with onElementUnavailable for robust tour step handling.
+			dropdown after clicking. 
+
+			A step element might also not be visible because it does not exist in the DOM yet, because it hasn't been created by another plugin or your code.
+
+			Use delayOnElement to instruct Tour to wait for **ANY** element to appear (== become visible) in the DOM before showing the step (or crapping out due to missing element). This means the tour step element can be one DOM element, but the delay will wait for a completely separate DOM element to appear. This is really useful for hidden divs etc. 
+
+			Use in conjunction with onElementUnavailable for robust tour step handling. If delayOnElement.maxDelay timeout is reached, Tourist will call onElementUnavailable function as defined in the step or globally. If
+			onElementUnavailable is not defined for the step or globally, the step will be skipped.
+
 
 			delayOnElement is an object with the following:
 							delayOnElement: {
