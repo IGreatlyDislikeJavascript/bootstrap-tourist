@@ -727,7 +727,7 @@
 										backdrop: false,
 										backdropContainer: 'body',
 										backdropOptions:	{
-																highlighOpacity:			0.9,
+																highlightOpacity:			0.9,
 																highlightColor:				"#FFF",
 																animation:	{
 																				// can be string of css class or function signature: function(domElement) {}
