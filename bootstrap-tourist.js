@@ -1215,7 +1215,8 @@
 						$(step.reflexElement).removeClass('tour-step-element-reflex').off((_this._reflexEvent(step.reflex)) + ".tour-" + _this._options.name);
 					}
 
-                    _this._hideOverlayElements(step);
+					// now handled by updateOverlayElements
+                    //_this._hideOverlayElements(step);
 					_this._unfixBootstrapSelectPickerZindex(step);
 
 					// If this step was pointed at a modal, revert changes to the step.element. See the notes in showStep for explanation
@@ -1745,11 +1746,11 @@
 			}
 			step = this.getStep(i);
 
-			// positionBackdrop now handles all show, hide and move of the background and highlight
-			this._positionBackdrop(step);
+			// handles all show, hide and move of the background and highlight
+			this._updateBackdropElements(step);
 
 			// Show the preventInteraction overlay etc
-			this._showOverlayElements(step);
+			this._updateOverlayElements(step);
 
 			// Required to fix the z index issue with BS select dropdowns
 			this._fixBootstrapSelectPickerZindex(step);
@@ -2280,6 +2281,9 @@
 
 		// ===================================================================================================================================================
 		// NEW OVERLAY CODE
+		//
+		// NOTE: "backdrop" refers to all the elements required to create the "dark background with a highlight" function, i.e.: a background div and
+		// a highlight div.
 		// ===================================================================================================================================================
 
 		// Actually creates the 3 divs for functionality
@@ -2314,7 +2318,7 @@
 			$(DOMID_PREVENT).remove();
 		};
 
-		// Hides only the backdrop (backdrop + highlight elements if not orphan). Caller is responsible for ensuring step wants hidden
+		// Hides only the background. Caller is responsible for ensuring step wants hidden
 		// backdrop
 		Tour.prototype._hideBackdrop = function(step)
         {
@@ -2342,8 +2346,6 @@
 			{
 				$(DOMID_BACKDROP).hide();
 			}
-
-
         };
 
 		// Shows the backdrop (backdrop + highlight elements if not orphan). Caller is responsible for ensuring step really wants a visible
@@ -2377,21 +2379,7 @@
 					// Orphan step will never require a highlight, as there's no element
 					if($(DOMID_HIGHLIGHT).is(':visible'))
 					{
-						// Does global or this step specify a function for the highlight layer hide?
-						if(typeof step.backdropOptions.animation.highlightHide == "function")
-						{
-							// pass DOM element jq object to function
-							step.backdropOptions.animation.highlightHide($(DOMID_HIGHLIGHT));
-						}
-						else
-						{
-							// must be a CSS class
-							$(DOMID_HIGHLIGHT).addClass(step.backdropOptions.animation.highlightHide);
-							$(DOMID_HIGHLIGHT).hide(0,	function()
-														{
-															$(this).removeClass(step.backdropOptions.animation.highlightHide);
-														});
-						}
+						this._hideHighlightOverlay(step);
 					}
 					else
 					{
@@ -2404,23 +2392,7 @@
 					if($(DOMID_HIGHLIGHT).is(':visible'))
 					{
 						// Already visible, so this is a transition - move from 1 position to another
-						// Does global or this step specify a function for the highlight layer transition?
-						if(typeof step.backdropOptions.animation.highlightTransition == "function")
-						{
-							// pass DOM element jq object to function
-							step.backdropOptions.animation.highlightTransition($(DOMID_HIGHLIGHT));
-							$(DOMID_HIGHLIGHT).width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
-						}
-						else
-						{
-							// must be a CSS class
-							$(DOMID_HIGHLIGHT).addClass(step.backdropOptions.animation.highlightTransition);
-							$(DOMID_HIGHLIGHT).width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
-							$(DOMID_HIGHLIGHT).one('webkitAnimationEnd oanimationend msAnimationEnd animationend',  function()
-																													{
-																														$(DOMID_HIGHLIGHT).removeClass(step.backdropOptions.animation.highlightTransition);
-																													});
-						}
+						this._positionHighlightOverlay(step);
 					}
 					else
 					{
@@ -2464,7 +2436,7 @@
 			}
 		};
 
-		// Shows the highlight
+		// Repositions a currently visible highlight
 		Tour.prototype._positionHighlightOverlay = function (step)
 		{
 			$(DOMID_HIGHLIGHT).css(	{
@@ -2511,7 +2483,7 @@
 		};
 
 		// Moves, shows or hides the backdrop and highlight element to match the specified step
-		Tour.prototype._positionBackdrop = function (step)
+		Tour.prototype._updateBackdropElements = function (step)
         {
 			// safety check, ensure no other elem has the highlight class
 			var $elemTmp = $(".tour-highlight-element");
@@ -2582,8 +2554,8 @@
 			}
         };
 
-		// Shows the preventInteraction div and any other overlay elements added in future features
-		Tour.prototype._showOverlayElements = function (step)
+		// Updates visibility of the preventInteraction div and any other overlay elements added in future features
+		Tour.prototype._updateOverlayElements = function (step)
 		{
 			// check if the popover for the current step already exists (is this a redraw)
 			if($(document).find(".popover.tour-" + this._options.name + ".tour-" + this._options.name + "-" + this.getCurrentStepIndex()).length != 0)
@@ -2605,12 +2577,12 @@
 
 		};
 
-		Tour.prototype._hideOverlayElements = function (step)
-		{
-			$(DOMID_PREVENT).css({"width": "0","height": "0","top": "0","left": "0"});
-            $(DOMID_PREVENT).hide();
-
-		};
+//		Tour.prototype._hideOverlayElements = function (step)
+//		{
+//			$(DOMID_PREVENT).css({"width": "0","height": "0","top": "0","left": "0"});
+//            $(DOMID_PREVENT).hide();
+//
+//		};
 
 		// ===================================================================================================================================================
 		// END NEW OVERLAY CODE
