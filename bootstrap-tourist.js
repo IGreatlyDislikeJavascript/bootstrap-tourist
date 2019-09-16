@@ -2359,7 +2359,7 @@
 				if(typeof step.backdropOptions.animation.backdropShow == "function")
 				{
 					// pass DOM element jq object to function
-					step.backdropOptions.animation.backdropHide($(DOMID_BACKDROP));
+					step.backdropOptions.animation.backdropShow($(DOMID_BACKDROP));
 				}
 				else
 				{
@@ -2492,7 +2492,17 @@
 				$elemTmp.removeClass('tour-highlight-element');
 			}
 
-            $(step.element).addClass('tour-highlight-element');
+
+			// Is this a modal - we must set the zindex on the modal element, not the modal-content element
+			var $modalCheck = $(step.element).parents(".modal:first");
+			if($modalCheck.length)
+			{
+				$modalCheck.addClass('tour-highlight-element');
+			}
+			else
+			{
+	            $(step.element).addClass('tour-highlight-element');
+			}
 
 			// Change to backdrop visibility required? (step.backdrop != current $(DOMID_BACKDROP) visibility)
 			if(step.backdrop != $(DOMID_BACKDROP).is(':visible'))
@@ -2558,22 +2568,22 @@
 		Tour.prototype._updateOverlayElements = function (step)
 		{
 			// check if the popover for the current step already exists (is this a redraw)
-			if($(document).find(".popover.tour-" + this._options.name + ".tour-" + this._options.name + "-" + this.getCurrentStepIndex()).length != 0)
+			if (step.preventInteraction)
 			{
-				// Yes. Likely this is because of a window scroll event
-				return;
-			}
+                this._debug("preventInteraction == true, adding overlay");
+                $(DOMID_PREVENT).width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
 
-            if (step.preventInteraction)
-			{
-				this._debug("preventInteraction == true, adding overlay");
-			    $(DOMID_PREVENT).width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
-                $(DOMID_PREVENT).show();
-			}
+				if ($(DOMID_PREVENT).length === 0)
+				{
+                    $('<div class="tour-prevent" id="' + DOMID_PREVENT.substr(1) + '" style="width:0px;height:0px;top:0px;left:0px;"></div>').insertAfter(DOMID_HIGHLIGHT);
+                    $(DOMID_PREVENT).width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
+                }
+            }
 			else
 			{
-				$(DOMID_PREVENT).hide();
-			}
+                $(DOMID_PREVENT).width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
+                $(DOMID_PREVENT).remove();
+            }
 
 		};
 
