@@ -731,12 +731,15 @@
 																highlightColor:				"#FFF",
 																animation:	{
 																				// can be string of css class or function signature: function(domElement) {}
-																				backdropShow:			function(domElement) { domElement.show(); },
+																				backdropShow:			function(domElement) { domElement.fadeIn(); },
 																				backdropHide:			function(domElement) { domElement.fadeOut("slow") },
-																				highlightShow:			function(domElement) { domElement.show(); },
+																				highlightShow:			function(domElement, step)
+																										{
+																											domElement.width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
+																											domElement.fadeIn();
+																										},
 																				highlightTransition:	"tour-highlight-animation",
-																				highlightHide:			function(domElement) { domElement.fadeOut("slow") },
-
+																				highlightHide:			function(domElement) { domElement.fadeOut("slow") }
 																			},
 															},
 										redirect: true,
@@ -1378,13 +1381,16 @@
 
 												$_modalObject.off("hidden.bs.modal", funcModalHelper);
 
+												// thanks to @eformx for finding this bug!
 												if (_this._isLast())
 												{
-													return _this.next();
+													_this._debug("Modal close reached end of tour");
+													return _this.end();
 												}
 												else
 												{
-													return _this.end();
+													_this._debug("Modal close: next step called");
+													return _this.next();
 												}
 											};
 										}(this, $modalObject);
@@ -1732,7 +1738,7 @@
 		};
 
 		Tour.prototype._isLast = function () {
-			return this._current < this._options.steps.length - 1;
+			return this._current >= this._options.steps.length - 1;
 		};
 
 		// wraps the calls to show the tour step in a popover and the background overlay.
@@ -2292,7 +2298,9 @@
 			// the .substr(1) is because the DOMID_ consts start with # for jq object ease...
 			var $backdrop = $('<div class="tour-backdrop" id="' + DOMID_BACKDROP.substr(1) + '"></div>');
             var $highlight = $('<div class="tour-highlight" id="' + DOMID_HIGHLIGHT.substr(1) + '" style="width:0px;height:0px;top:0px;left:0px;"></div>');
-            var $preventDiv = $('<div class="tour-prevent" id="' + DOMID_PREVENT.substr(1) + '" style="width:0px;height:0px;top:0px;left:0px;"></div>');
+
+			// _updateOverlayElements creates and destroys prevent div as required
+            //var $preventDiv = $('<div class="tour-prevent" id="' + DOMID_PREVENT.substr(1) + '" style="width:0px;height:0px;top:0px;left:0px;"></div>');
 
             //var $debug = $('<!-- debug -->');
 			//$("body").append($debug);
@@ -2305,10 +2313,11 @@
             {
                 $(this._options.backdropContainer).append($highlight);
             }
-            if ($(DOMID_PREVENT).length === 0)
-            {
-                $(this._options.backdropContainer).append($preventDiv);
-            }
+
+//            if ($(DOMID_PREVENT).length === 0)
+//            {
+//                $(this._options.backdropContainer).append($preventDiv);
+//            }
         };
 
 		Tour.prototype._destroyOverlayElements = function(step)
@@ -2318,13 +2327,17 @@
 			$(DOMID_PREVENT).remove();
 		};
 
-		// Hides only the background. Caller is responsible for ensuring step wants hidden
+		// Hides the background and highlight. Caller is responsible for ensuring step wants hidden
 		// backdrop
 		Tour.prototype._hideBackdrop = function(step)
         {
 			var step = step || null;
+
 			if(step)
 			{
+				// No backdrop? No need for highlight
+				this._hideHighlightOverlay(step);
+
 				// Does global or this step specify a function for the backdrop layer hide?
 				if(typeof step.backdropOptions.animation.backdropHide == "function")
 				{
@@ -2344,7 +2357,8 @@
 			}
 			else
 			{
-				$(DOMID_BACKDROP).hide();
+				$(DOMID_BACKDROP).hide(0);
+				$(DOMID_HIGHLIGHT).hide(0);
 			}
         };
 
@@ -2353,6 +2367,11 @@
 		Tour.prototype._showBackdrop = function (step)
         {
 			var step = step || null;
+
+			// Ensure we're always starting with a clean, hidden backdrop - this ensures any previous step.backdropOptions.animation.* functions
+			// haven't messed with the classes
+			$(DOMID_BACKDROP).removeClass().addClass("tour-backdrop").hide(0);
+
 			if(step)
 			{
 				// Does global or this step specify a function for the backdrop layer show?
@@ -2391,7 +2410,8 @@
 					// Not an orphan, so requires a highlight layer.
 					if($(DOMID_HIGHLIGHT).is(':visible'))
 					{
-						// Already visible, so this is a transition - move from 1 position to another
+						// Already visible, so this is a transition - move from 1 position to another. This shouldn't be possible,
+						// as a call to showBackdrop() logically means the backdrop is hidden, therefore the highlight is hidden. Kept for safety.
 						this._positionHighlightOverlay(step);
 					}
 					else
@@ -2404,8 +2424,8 @@
 			}
 			else
 			{
-				$(DOMID_BACKDROP).show();
-				$(DOMID_HIGHLIGHT).show();
+				$(DOMID_BACKDROP).show(0);
+				$(DOMID_HIGHLIGHT).show(0);
 			}
         };
 
@@ -2413,21 +2433,29 @@
 		// Shows the highlight
 		Tour.prototype._showHighlightOverlay = function (step)
 		{
-			$(DOMID_HIGHLIGHT).css(	{
-										"opacity": step.backdropOptions.highlightOpacity,
-										"background-color": step.backdropOptions.highlightColor
-									});
+			// Ensure we're always starting with a clean, hidden highlight - this ensures any previous step.backdropOptions.animation.* functions
+			// haven't messed with the classes
+			$(DOMID_HIGHLIGHT).removeClass().addClass("tour-highlight").hide(0);
 
 			if(typeof step.backdropOptions.animation.highlightShow == "function")
 			{
-				// pass DOM element jq object to function
-				step.backdropOptions.animation.highlightShow($(DOMID_HIGHLIGHT));
-				$(DOMID_HIGHLIGHT).width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
+				// pass DOM element jq object to function. Function is completely responsible for positioning and showing.
+				// dupe the step to avoid function messing with original object. In future, change this to only pass selected properties?
+				var tmpStep = $.extend(true, {}, step);
+				step.backdropOptions.animation.highlightShow($(DOMID_HIGHLIGHT), tmpStep);
 			}
 			else
 			{
-				// must be a CSS class
+				// must be a CSS class. Give a default animation
+				$(DOMID_HIGHLIGHT).css(	{
+											"opacity": step.backdropOptions.highlightOpacity,
+											"background-color": step.backdropOptions.highlightColor
+										});
+
+				$(DOMID_HIGHLIGHT).width(0).height(0).offset({ top: 0, left: 0 });
+				$(DOMID_HIGHLIGHT).show(0);
 				$(DOMID_HIGHLIGHT).addClass(step.backdropOptions.animation.highlightShow);
+
 				$(DOMID_HIGHLIGHT).width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
 				$(DOMID_HIGHLIGHT).one('webkitAnimationEnd oanimationend msAnimationEnd animationend',  function()
 																										{
@@ -2439,20 +2467,27 @@
 		// Repositions a currently visible highlight
 		Tour.prototype._positionHighlightOverlay = function (step)
 		{
-			$(DOMID_HIGHLIGHT).css(	{
-										"opacity": step.backdropOptions.highlightOpacity,
-										"background-color": step.backdropOptions.highlightColor
-									});
-
 			if(typeof step.backdropOptions.animation.highlightTransition == "function")
 			{
-				// pass DOM element jq object to function
-				step.backdropOptions.animation.highlightTransition($(DOMID_HIGHLIGHT));
-				$(DOMID_HIGHLIGHT).width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
+				// Don't clean existing classes - this allows tour coder to fully control the highlight between steps
+
+				// pass DOM element jq object to function. Function is completely responsible for positioning and showing.
+				// dupe the step to avoid function messing with original object. In future, change this to only pass selected properties?
+				var tmpStep = $.extend(true, {}, step);
+				step.backdropOptions.animation.highlightTransition($(DOMID_HIGHLIGHT), tmpStep);
 			}
 			else
 			{
-				// must be a CSS class
+				// must be a CSS class. Start by cleaning all other classes
+				$(DOMID_HIGHLIGHT).removeClass().addClass("tour-highlight");
+
+				// obey step options
+				$(DOMID_HIGHLIGHT).css(	{
+											"opacity": step.backdropOptions.highlightOpacity,
+											"background-color": step.backdropOptions.highlightColor
+										});
+
+				// add transition animations
 				$(DOMID_HIGHLIGHT).addClass(step.backdropOptions.animation.highlightTransition);
 				$(DOMID_HIGHLIGHT).width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
 				$(DOMID_HIGHLIGHT).one('webkitAnimationEnd oanimationend msAnimationEnd animationend',  function()
@@ -2466,18 +2501,21 @@
 		{
 			if(typeof step.backdropOptions.animation.highlightHide == "function")
 			{
-				// pass DOM element jq object to function
-				step.backdropOptions.animation.highlightHide($(DOMID_HIGHLIGHT));
-				$(DOMID_HIGHLIGHT).width(0).height(0).offset({ top: 0, left: 0 });
+				// pass DOM element jq object to function. Function is completely responsible for positioning and showing.
+				// dupe the step to avoid function messing with original object. In future, change this to only pass selected properties?
+				var tmpStep = $.extend(true, {}, step);
+				step.backdropOptions.animation.highlightHide($(DOMID_HIGHLIGHT), tmpStep);
 			}
 			else
 			{
 				// must be a CSS class
 				$(DOMID_HIGHLIGHT).addClass(step.backdropOptions.animation.highlightHide);
-				$(DOMID_HIGHLIGHT).width(0).height(0).offset({ top: 0, left: 0 });
+				//$(DOMID_HIGHLIGHT).width(0).height(0).offset({ top: 0, left: 0 });
 				$(DOMID_HIGHLIGHT).one('webkitAnimationEnd oanimationend msAnimationEnd animationend',  function()
 																										{
-																											$(DOMID_HIGHLIGHT).removeClass(step.backdropOptions.animation.highlightHide);
+																											// ensure we end with a clean div
+																											$(DOMID_HIGHLIGHT).removeClass().addClass("tour-highlight");
+																											$(DOMID_HIGHLIGHT).hide(0);
 																										});
 			}
 		};
@@ -2555,7 +2593,7 @@
 				else
 				{
 					// Step does not include backdrop, backdrop is already hidden.
-					// Ensure highlight is also hidden
+					// Ensure highlight is also hidden - safety check as hideBackdrop also hides highlight
 					if($(DOMID_HIGHLIGHT).is(':visible'))
 					{
 						this._hideHighlightOverlay(step);
@@ -2571,28 +2609,20 @@
 			if (step.preventInteraction)
 			{
                 this._debug("preventInteraction == true, adding overlay");
-                $(DOMID_PREVENT).width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
-
 				if ($(DOMID_PREVENT).length === 0)
 				{
                     $('<div class="tour-prevent" id="' + DOMID_PREVENT.substr(1) + '" style="width:0px;height:0px;top:0px;left:0px;"></div>').insertAfter(DOMID_HIGHLIGHT);
-                    $(DOMID_PREVENT).width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
                 }
+
+                $(DOMID_PREVENT).width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
             }
 			else
 			{
-                $(DOMID_PREVENT).width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
                 $(DOMID_PREVENT).remove();
             }
 
 		};
 
-//		Tour.prototype._hideOverlayElements = function (step)
-//		{
-//			$(DOMID_PREVENT).css({"width": "0","height": "0","top": "0","left": "0"});
-//            $(DOMID_PREVENT).hide();
-//
-//		};
 
 		// ===================================================================================================================================================
 		// END NEW OVERLAY CODE
