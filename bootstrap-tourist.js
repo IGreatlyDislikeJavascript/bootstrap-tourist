@@ -744,6 +744,7 @@
 															},
 										redirect: true,
 										orphan: false,
+										showIfUnintendedOrphan: false,
 										duration: false,
 										delay: false,
 										basePath: '',
@@ -943,6 +944,7 @@
 															redirect: this._options.redirect,
 															preventInteraction: false,
 															orphan: this._options.orphan,
+															showIfUnintendedOrphan: this._options.showIfUnintendedOrphan,
 															duration: this._options.duration,
 															delay: this._options.delay,
 															template: this._options.template,
@@ -1407,46 +1409,63 @@
 				$modalObject.off("hidden.bs.modal", funcModalHelper).on("hidden.bs.modal", funcModalHelper);
 			}
 
-			// Helper function to actually show the popover using _showPopoverAndOverlay
-			showStepHelper = (function (_this) {
-				return function (e) {
-					if (_this._isOrphan(step)) {
-						if (step.orphan === false)
-						{
-							_this._debug("Skip the orphan step " + (_this._current + 1) + ".\nOrphan option is false and the element " + step.element + " does not exist or is hidden.");
+			// Helper function to actually show the popover using _showPopoverAndOverlay.
+			// Note the flow - this is called immediately unless delayOnElement is set. If delayOnElement is set, this
+			// func will be called if (a) the element appears, or (b) the element doesn't appear in the timeout.
+			// Therefore this helper func MUST handle unintended orphans
+			showStepHelper = (	function (_this)
+								{
+									return	function (e)
+											{
+												if (_this._isOrphan(step))
+												{
+													// Is this an unintended orphan?
+													if (step.orphan === false && step.showIfUnintendedOrphan === false)
+													{
+														_this._debug("Skip the orphan step " + (_this._current + 1) + ".\nOrphan option is false and the element " + step.element + " does not exist or is hidden.");
 
-							if(typeof(step.onElementUnavailable) == "function")
-							{
-								_this._debug("Calling onElementUnavailable callback");
-								step.onElementUnavailable(_this, _this._current);
-							}
+														if(typeof(step.onElementUnavailable) == "function")
+														{
+															_this._debug("Calling onElementUnavailable callback");
+															step.onElementUnavailable(_this, _this._current);
+														}
 
-							if (skipToPrevious) {
-								_this._showPrevStep(true);
-							} else {
-								_this._showNextStep(true);
-							}
-							return;
-						}
-						_this._debug("Show the orphan step " + (_this._current + 1) + ". Orphans option is true.");
-					}
+														if (skipToPrevious) {
+															_this._showPrevStep(true);
+														} else {
+															_this._showNextStep(true);
+														}
+														return;
+													}
 
-					//console.log(step);
+													if (step.orphan === false && step.showIfUnintendedOrphan === true)
+													{
+														// it's an unintended orphan, and global or step options still want to show it
+														_this._debug("Show the unintended orphan step " + (_this._current + 1) + ". showIfUnintendedOrphan option is true.");
+													}
+													else
+													{
+														// It's an intended orphan
+														_this._debug("Show the orphan step " + (_this._current + 1) + ". Orphans option is true.");
+													}
+												}
 
-					if (step.autoscroll && !_this._isOrphan(step))
-					{
-						_this._scrollIntoView(i);
-					}
-					else
-					{
-						_this._showPopoverAndOverlay(i);
-					}
+												//console.log(step);
 
-					if (step.duration) {
-						return _this.resume();
-					}
-				};
-			})(this);
+												if (step.autoscroll && !_this._isOrphan(step))
+												{
+													_this._scrollIntoView(i);
+												}
+												else
+												{
+													_this._showPopoverAndOverlay(i);
+												}
+
+												if (step.duration) {
+													return _this.resume();
+												}
+											};
+								})(this);
 
 
 			// delay in millisec specified in step options
@@ -1814,6 +1833,12 @@
 					// Note: BS4 popper.js requires additional fiddling to work, see below where popOpts object is created
 					step.element = 'body';
 					step.placement = 'top';
+
+					// If step is an intended or unintended orphan, and reflexOnly is set, show a warning.
+					if(step.reflexOnly)
+					{
+						this._debug("Step is an orphan, and reflexOnly is set: ignoring reflexOnly");
+					}
 				}
 
 				$element = $(step.element);
@@ -1837,6 +1862,12 @@
 										}
 									};
 						})(this));
+
+					if(step.reflexOnly)
+					{
+						// Only hide the next button if this step is NOT an orphan
+						step.template.find('[data-role="next"]').hide();
+					}
 				}
 
 
@@ -2010,9 +2041,11 @@
 			if (step.next < 0) {
 				$next.addClass('disabled').prop('disabled', true).prop('tabindex', -1);
 			}
-			if (step.reflexOnly) {
-				$next.hide();
-			}
+			// Cannot do this here due to new option showIfUnintendedOrphan - an unintended orphan with reflex/reflexonly will create a
+			// tour step that can't be moved on from!
+//			if (step.reflexOnly) {
+//				$next.hide();
+//			}
 			if (!step.duration) {
 				$resume.remove();
 			}
