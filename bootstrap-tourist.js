@@ -941,7 +941,6 @@
 															backdrop: this._options.backdrop,
 															//backdropOptions: this._options.backdropOptions, << SEE BELOW
 															redirect: this._options.redirect,
-															reflexElement: this._options.steps[i].element,
 															preventInteraction: false,
 															orphan: this._options.orphan,
 															duration: this._options.duration,
@@ -1083,9 +1082,13 @@
 			return this._callOnPromiseDone(promise, this.showStep, i);
 		};
 
-		Tour.prototype.end = function () {
+		Tour.prototype.end = function ()
+		{
+			this._debug("Tour.end() called");
+
 			var endHelper,
 			promise;
+
 			endHelper = (function (_this) {
 				return function (e) {
 					$(document).off("click.tour-" + _this._options.name);
@@ -1094,6 +1097,7 @@
 					$(window).off("scroll.tour-" + _this._options.name);
 					_this._setState('end', 'yes');
 					_this._clearTimer();
+					$(".tour-step-element-reflex").removeClass("tour-step-element-reflex");
                     _this._hideBackdrop();
 					_this._destroyOverlayElements();
 
@@ -1143,15 +1147,20 @@
 			this._paused = false;
 			this._start = new Date().getTime();
 			this._duration = this._duration || step.duration;
-			this._timer = window.setTimeout((function (_this) {
-						return function () {
-							if (_this._isLast()) {
-								return _this.next();
-							} else {
-								return _this.end();
-							}
-						};
-					})(this), this._duration);
+			this._timer = window.setTimeout((	function (_this)
+												{
+													return	function ()
+															{
+																if (_this._isLast())
+																{
+																	return _this.end();
+																}
+																else
+																{
+																	return _this.next();
+																}
+												};
+											})(this), this._duration);
 			this._debug("Started step " + (this._current + 1) + " timer with duration " + this._duration);
 			if ((step.onResume != null) && this._duration !== step.duration) {
 				return step.onResume(this, this._duration);
@@ -1215,7 +1224,7 @@
 
 					if (step.reflex)
 					{
-						$(step.reflexElement).removeClass('tour-step-element-reflex').off((_this._reflexEvent(step.reflex)) + ".tour-" + _this._options.name);
+						$element.removeClass('tour-step-element-reflex').off((_this._reflexEvent(step.reflex)) + ".tour-" + _this._options.name);
 					}
 
 					// now handled by updateOverlayElements
@@ -1659,7 +1668,7 @@
 
 		Tour.prototype._debug = function (text) {
 			if (this._options.debug) {
-				return window.console.log("[ Bootstrap Tour: '" + this._options.name + "' ] " + text);
+				return window.console.log("[ Bootstrap Tourist: '" + this._options.name + "' ] " + text);
 			}
 		};
 
@@ -1814,14 +1823,19 @@
 
 				if (step.reflex && !isOrphan)
 				{
-					$(step.reflexElement).addClass('tour-step-element-reflex').off((this._reflexEvent(step.reflex)) + ".tour-" + this._options.name).on((this._reflexEvent(step.reflex)) + ".tour-" + this._options.name, (function (_this) {
-							return function () {
-								if (_this._isLast()) {
-									return _this.next();
-								} else {
-									return _this.end();
-								}
-							};
+					$element.addClass('tour-step-element-reflex');
+					$element.off((this._reflexEvent(step.reflex)) + ".tour-" + this._options.name).on((this._reflexEvent(step.reflex)) + ".tour-" + this._options.name, (function (_this) {
+							return function ()
+									{
+										if (_this._isLast())
+										{
+											return _this.end();
+										}
+										else
+										{
+											return _this.next();
+										}
+									};
 						})(this));
 				}
 
@@ -2174,20 +2188,32 @@
 						if (!e.which) {
 							return;
 						}
-						switch (e.which) {
-						case 39:
-							e.preventDefault();
-							if (_this._isLast()) {
-								return _this.next();
-							} else {
+						switch (e.which)
+						{
+							case 39:
+								e.preventDefault();
+								if(_this._isLast())
+								{
+									return _this.end();
+								}
+								else
+								{
+									return _this.next();
+								}
+								break;
+
+							case 37:
+								e.preventDefault();
+								if (_this._current > 0)
+								{
+									return _this.prev();
+								}
+								break;
+
+							case 27:
+								e.preventDefault();
 								return _this.end();
-							}
-							break;
-						case 37:
-							e.preventDefault();
-							if (_this._current > 0) {
-								return _this.prev();
-							}
+								break;
 						}
 					};
 				})(this));
@@ -2325,6 +2351,8 @@
 			$(DOMID_BACKDROP).remove();
 			$(DOMID_HIGHLIGHT).remove();
 			$(DOMID_PREVENT).remove();
+
+			$(".tour-highlight-element").removeClass("tour-highlight-element");
 		};
 
 		// Hides the background and highlight. Caller is responsible for ensuring step wants hidden
