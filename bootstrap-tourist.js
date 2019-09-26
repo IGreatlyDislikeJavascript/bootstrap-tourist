@@ -120,6 +120,7 @@
  13. Switch between Bootstrap 3 or 4 (popover methods and template) automatically using tour options
  14. Added sanitizeWhitelist and sanitizeFunction global options
  15. Added support for changing button texts
+ 16. Added showIfUnintendedOrphan to show a tour step as an orphan if its element doesn't exist, overriding onElementUnavailable
 
  --------------
 	1. Control flow from onNext() / onPrevious() options:
@@ -649,6 +650,42 @@
 								});
 
 
+----------------
+	16. Added showIfUnintendedOrphan
+		With thanks to @diesl
+
+		If a tour step specifies an element, and the element doesn't exist, showIfUnintendedOrphan will show the tour step as an orphan. This ensures
+		your tour step will always be shown.
+
+		delayOnElement takes priority over showIfUnintendedOrphan. I.e.: if you specify both delayOnElement and showIfUnintendedOrphan, the delay will timeout
+		before the step will be shown as an orphan.
+
+		This option is available globally and per step.
+
+			var tourSteps = [
+								{
+									element: "#btnSomething",
+									showIfUnintendedOrphan: true,
+									title: "Always",
+									content: "This tour step will always appear, either against element btnSomething if it exists, or as an orphan if it doesn't"
+								},
+								{
+									element: "#btnSomethingElse",
+									showIfUnintendedOrphan: true,
+									delayOnElement:	{
+														delayElement: "element" // use string literal "element" to wait for this step's element, i.e.: #btnSomethingElse
+													},
+									title: "Always after a delay",
+									content: "This tour step will always appear. If element btnSomethingElse doesn't exist, delayOnElement will wait until it exists. If delayOnElement times out, step will show as an orphan"
+								},
+								{
+									element: "#btnDoesntExist",
+									showIfUnintendedOrphan: true,
+									title: "Always",
+									content: "This tour step will always appear",
+									onElementUnavailable: function() { console.log("this will never get called as showIfUnintendedOrphan will show step as an orphan"); }
+								},
+							]
  *
  */
 
