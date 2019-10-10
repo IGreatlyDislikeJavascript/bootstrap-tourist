@@ -969,6 +969,9 @@
 															path: '',
 															host: '',
 															placement: 'right',
+															positioning:{
+																			adjustRelative: null
+																		},
 															title: '',
 															content: '<p></p>',
 															next: i === this._options.steps.length - 1 ? -1 : i + 1,
@@ -1675,7 +1678,7 @@
 			// only call the onNext handler if this is a click and NOT an orphan skip due to missing element
 			if (skipOrphan === false &&  step.onNext != null)
 			{
-				rslt = step.onNext(this);
+				var rslt = step.onNext(this);
 
 				if(rslt === false)
 				{
@@ -1708,7 +1711,7 @@
 			// only call the onPrev handler if this is a click and NOT an orphan skip due to missing element
 			if (skipOrphan === false && step.onPrev != null)
 			{
-				rslt = step.onPrev(this);
+				var rslt = step.onPrev(this);
 
 				if(rslt === false)
 				{
@@ -1902,11 +1905,11 @@
 
 					if(step.reflexOnly)
 					{
-						// Only hide the next button if this step is NOT an orphan
-						step.template.find('[data-role="next"]').hide();
+						// Only disable the next button if this step is NOT an orphan
+						// THIS DOESN'T WORK, it's a string not a jq object - we need to replace or disable or hide the Next button by data-role
+						step.template.replace('data-role="next"', 'disabled');
 					}
 				}
-
 
 				title = step.title;
 				content = step.content;
@@ -1980,19 +1983,27 @@
 											obj.popper.left = left;
 											obj.popper.right = top + obj.popper.width;
 											return obj;
-										}
+										};
 					}
 					else
 					{
 						// BS3 popover accepts jq object or string literal. BS4 popper.js of course doesn't, just to make life extra irritating.
 						popOpts.selector = "#" + step.element[0].id;
-					}
-				}
 
-				// BS4 / popper.js does not accept a jquery object as element. BS3 popover does!
-				if(this._options.framework == "bootstrap4" && isOrphan == false)
-				{
-					popOpts.selector = "#" + step.element[0].id;
+						// Allow manual repositioning of the popover
+						// THIS DOESN'T WORK - popper.js will only adjust on one axis even if both axis are specified...
+						if(step.positioning.adjustRelative !== null && step.positioning.adjustRelative.length > 0)
+						{
+							if(typeof step.positioning.adjustRelative == "function")
+							{
+								popOpts.offset = step.positioning.adjustRelative();
+							}
+							else
+							{
+								popOpts.offset = step.positioning.adjustRelative;
+							}
+						}
+					}
 				}
 
 				$element.popover(popOpts);
@@ -2079,7 +2090,7 @@
 				$next.addClass('disabled').prop('disabled', true).prop('tabindex', -1);
 			}
 			// Cannot do this here due to new option showIfUnintendedOrphan - an unintended orphan with reflex/reflexonly will create a
-			// tour step that can't be moved on from!
+			// tour step that can't be moved on from! This must be done in showStep.
 //			if (step.reflexOnly) {
 //				$next.hide();
 //			}
@@ -2528,9 +2539,27 @@
         };
 
 
-		// Shows the highlight
+		// Shows the highlight and applies class to highlighted element
 		Tour.prototype._showHighlightOverlay = function (step)
 		{
+			// safety check, ensure no other elem has the highlight class
+			var $elemTmp = $(".tour-highlight-element");
+			if($elemTmp.length > 0)
+			{
+				$elemTmp.removeClass('tour-highlight-element');
+			}
+
+			// Is this a modal - we must set the zindex on the modal element, not the modal-content element
+			var $modalCheck = $(step.element).parents(".modal:first");
+			if($modalCheck.length)
+			{
+				$modalCheck.addClass('tour-highlight-element');
+			}
+			else
+			{
+				$(step.element).addClass('tour-highlight-element');
+			}
+
 			// Ensure we're always starting with a clean, hidden highlight - this ensures any previous step.backdropOptions.animation.* functions
 			// haven't messed with the classes
 			$(DOMID_HIGHLIGHT).removeClass().addClass("tour-highlight").hide(0);
@@ -2565,6 +2594,24 @@
 		// Repositions a currently visible highlight
 		Tour.prototype._positionHighlightOverlay = function (step)
 		{
+			// safety check, ensure no other elem has the highlight class
+			var $elemTmp = $(".tour-highlight-element");
+			if($elemTmp.length > 0)
+			{
+				$elemTmp.removeClass('tour-highlight-element');
+			}
+
+			// Is this a modal - we must set the zindex on the modal element, not the modal-content element
+			var $modalCheck = $(step.element).parents(".modal:first");
+			if($modalCheck.length)
+			{
+				$modalCheck.addClass('tour-highlight-element');
+			}
+			else
+			{
+				$(step.element).addClass('tour-highlight-element');
+			}
+
 			if(typeof step.backdropOptions.animation.highlightTransition == "function")
 			{
 				// Don't clean existing classes - this allows tour coder to fully control the highlight between steps
@@ -2597,6 +2644,9 @@
 
 		Tour.prototype._hideHighlightOverlay = function (step)
 		{
+			// remove the highlight class
+			$(".tour-highlight-element").removeClass('tour-highlight-element');
+
 			if(typeof step.backdropOptions.animation.highlightHide == "function")
 			{
 				// pass DOM element jq object to function. Function is completely responsible for positioning and showing.
@@ -2621,31 +2671,13 @@
 		// Moves, shows or hides the backdrop and highlight element to match the specified step
 		Tour.prototype._updateBackdropElements = function (step)
         {
-			// safety check, ensure no other elem has the highlight class
-			var $elemTmp = $(".tour-highlight-element");
-			if($elemTmp.length > 0)
-			{
-				$elemTmp.removeClass('tour-highlight-element');
-			}
-
-
-			// Is this a modal - we must set the zindex on the modal element, not the modal-content element
-			var $modalCheck = $(step.element).parents(".modal:first");
-			if($modalCheck.length)
-			{
-				$modalCheck.addClass('tour-highlight-element');
-			}
-			else
-			{
-	            $(step.element).addClass('tour-highlight-element');
-			}
-
 			// Change to backdrop visibility required? (step.backdrop != current $(DOMID_BACKDROP) visibility)
 			if(step.backdrop != $(DOMID_BACKDROP).is(':visible'))
 			{
 				// step backdrop not in sync with actual backdrop. Deal with it!
 				if(step.backdrop)
 				{
+					// handles both the background div and the highlight layer
 					this._showBackdrop(step);
 				}
 				else
