@@ -715,10 +715,6 @@
 
 		function Tour(options)
 		{
-
-			alert("THIS IS A BETA VERSION OF TOURIST TO SUPPORT AN IN-PROGRESS MAJOR CHANGE TO BACKDROP MANAGEMENT. DO NOT USE FOR PRODUCTION");
-
-
 			var storage;
 			try
 			{
@@ -1905,11 +1901,30 @@
 
 					if(step.reflexOnly)
 					{
-						// Only disable the next button if this step is NOT an orphan
-						// THIS DOESN'T WORK, it's a string not a jq object - we need to replace or disable or hide the Next button by data-role
-						step.template.replace('data-role="next"', 'disabled');
+						// Only disable the next button if this step is NOT an orphan.
+						// This is difficult to achieve robustly because tour creator can use a custom template. Instead of trying to manually
+						// edit the template - which must be a string to be passed to popover creation - use jquery to find the element, hide
+						// it, then use the resulting DOM code/string to search and replace
+
+						// Find "next" object (button, href, etc), create a copy
+						var $objNext = $(step.template).find('[data-role="next"]').clone();
+
+						if($objNext.length)
+						{
+							// Get the DOM code for the object
+							var strNext = $objNext[0].outerHTML;
+
+							$objNext.hide();
+
+							// Get the DOM code for the hidden object
+							var strHidden = $objNext[0].outerHTML;
+
+							// string replace it in the template
+							step.template = step.template.replace(strNext, strHidden);
+						}
 					}
 				}
+
 
 				title = step.title;
 				content = step.content;
@@ -2090,7 +2105,8 @@
 				$next.addClass('disabled').prop('disabled', true).prop('tabindex', -1);
 			}
 			// Cannot do this here due to new option showIfUnintendedOrphan - an unintended orphan with reflex/reflexonly will create a
-			// tour step that can't be moved on from! This must be done in showStep.
+			// tour step that can't be moved on from! This must be done in showPopover, which is called after the step is loaded and any
+			// delayOnElement timeouts etc have occurred, meaning we know for certain in _showPopover whether the step is an orphan
 //			if (step.reflexOnly) {
 //				$next.hide();
 //			}
