@@ -983,6 +983,7 @@
 															showIfUnintendedOrphan: this._options.showIfUnintendedOrphan,
 															duration: this._options.duration,
 															delay: this._options.delay,
+															delayOnElement:	null,
 															template: this._options.template,
 															showProgressBar: this._options.showProgressBar,
 															showProgressText: this._options.showProgressText,
@@ -2554,6 +2555,35 @@
 			}
         };
 
+		// Creates an object representing the current step with a subset of properties and functions, for
+		// tour creator to use when passing functions to step.backdropOptions.animation options
+		Tour.prototype._createStepSubset = function (step)
+		{
+			var _this = this;
+			var _stepElement = $(step.element);
+
+			var stepSubset =	{
+									element:				_stepElement,
+									container:				step.container,
+									autoscroll:				step.autoscroll,
+									backdrop:				step.backdrop,
+									preventInteraction:		step.preventInteraction,
+									isOrphan:				this._isOrphan(step),
+									orphan:					step.orphan,
+									showIfUnintendedOrphan:	step.showIfUnintendedOrphan,
+									duration:				step.duration,
+									delay:					step.delay,
+									fnPositionHighlight:	function()
+															{
+																_this._debug("Positioning highlight (fnPositionHighlight) over step element " + _stepElement[0].id + ":\nWidth = " + _stepElement.outerWidth() + ", height = " + _stepElement.outerHeight() + "\nTop: " + _stepElement.offset().top + ", left: " + _stepElement.offset().left);
+																$(DOMID_HIGHLIGHT).width(_stepElement.outerWidth()).height(_stepElement.outerHeight()).offset(_stepElement.offset());
+															},
+
+								};
+
+			return stepSubset;
+		};
+
 
 		// Shows the highlight and applies class to highlighted element
 		Tour.prototype._showHighlightOverlay = function (step)
@@ -2584,8 +2614,8 @@
 			{
 				// pass DOM element jq object to function. Function is completely responsible for positioning and showing.
 				// dupe the step to avoid function messing with original object. In future, change this to only pass selected properties?
-				var tmpStep = $.extend(true, {}, step);
-				step.backdropOptions.animation.highlightShow($(DOMID_HIGHLIGHT), tmpStep);
+				//var tmpStep = $.extend(true, {}, step);
+				step.backdropOptions.animation.highlightShow($(DOMID_HIGHLIGHT), this._createStepSubset(step));
 			}
 			else
 			{
@@ -2634,8 +2664,8 @@
 
 				// pass DOM element jq object to function. Function is completely responsible for positioning and showing.
 				// dupe the step to avoid function messing with original object. In future, change this to only pass selected properties?
-				var tmpStep = $.extend(true, {}, step);
-				step.backdropOptions.animation.highlightTransition($(DOMID_HIGHLIGHT), tmpStep);
+				//var tmpStep = $.extend(true, {}, step);
+				step.backdropOptions.animation.highlightTransition($(DOMID_HIGHLIGHT), this._createStepSubset(step));
 			}
 			else
 			{
