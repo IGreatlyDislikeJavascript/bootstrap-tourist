@@ -1,6 +1,6 @@
 /* ========================================================================
  *
- * Bootstrap Tourist v0.2.0
+ * Bootstrap Tourist v0.3.0
  * Copyright FFS 2019
  * @ IGreatlyDislikeJavascript on Github
  *
@@ -25,9 +25,8 @@
  * ========================================================================
  * ENTIRELY BASED UPON:
  *
- * bootstrap-tour - v0.2.0
+ * bootstrap-tour
  * http://bootstraptour.com
- * ========================================================================
  * Copyright 2012-2015 Ulrich Sossou
  *
  * ========================================================================
@@ -44,7 +43,17 @@
  * limitations under the License.
  * ========================================================================
  *
- * Updated for CS by FFS 2018
+ * Updated for CS by FFS 2019
+ *
+ * Changes in v0.3.0
+ *  - MAJOR REVISION: new method of backdrop and highlight added, with major effort and code from @ibastevan.
+ *  - Also added many other features
+ *
+ *					  Please read the documentation below, titled "v0.3.0 CHANGE NOTE"
+ *
+ * Changes in v0.2.1
+ * 	- delayOnElement option now waits for elements not yet created in the DOM (thanks to @lukaszmn)
+ *  - published as release
  *
  * Changes in v0.2.0
  *  - Version update as major fix to bug preventing element: function(){...} feature under BS4/popper.js
@@ -89,6 +98,30 @@
 
  ---------
 
+********************** v0.3.0 CHANGE NOTE *************************
+*
+* v0.3.0 represents a significant change to Bootstrap Tourist.
+*
+* Tourist is still completely drop-in replacement compatible with original Tour,
+* however @ibastevan and @IGreatlyDislikeJavascript have made significant changes
+* to how the backdrop works. You can read the conversation here:
+* https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/pull/24
+*
+* In short, previous versions of Tourist (and original Tour) used 4 divs to bracket
+* the tour step elements.
+*
+* From v0.3.0, Tourist now uses overlays to produce the same effect. This solves
+* many problems and enables many new features, including customizable transitions
+* between tour steps.
+*
+* There may be residual bugs from this change so please report them in
+* the repo!
+*
+********************************************************************
+
+
+ ---------
+
 
  This fork and code adds following features to Bootstrap Tour
 
@@ -107,6 +140,11 @@
  13. Switch between Bootstrap 3 or 4 (popover methods and template) automatically using tour options
  14. Added sanitizeWhitelist and sanitizeFunction global options
  15. Added support for changing button texts
+
+from v0.3.0:
+
+ 16. Added showIfUnintendedOrphan to show a tour step as an orphan if its element doesn't exist, overriding onElementUnavailable
+ 17. Overlay divs and customizable transitions between tour steps
 
  --------------
 	1. Control flow from onNext() / onPrevious() options:
@@ -349,7 +387,7 @@
 
 			delayOnElement is an object with the following:
 							delayOnElement: {
-												delayElement: "#waitForMe", // the element to wait to become visible, or the string literal "element" to use the step element
+												delayElement: "#waitForMe", // the element to wait to become visible, or the string literal "element" to use the step element, or a function
 												maxDelay: 2000 // optional milliseconds to wait/timeout for the element, before crapping out. If maxDelay is not specified, this is 2000ms by default,
 											}
 
@@ -361,6 +399,14 @@
 													},
 									title: "Ages",
 									content: "This button takes ages to appear"
+								},
+								{
+									element: "#btnPrettyTransition",
+									delayOnElement:	{
+														delayElement: function() { return $("#btnPrettyTransition"); } // return a jquery object to wait for, in this case #btnPrettyTransition
+													},
+									title: "Function",
+									content: "This button takes ages to appear, we're waiting for an element returned by function"
 								},
 								{
 									element: "#inputUnrelated",
@@ -628,6 +674,235 @@
 								});
 
 
+----------------
+	16. Added showIfUnintendedOrphan
+		With thanks to @diesl
+
+		If a tour step specifies an element, and the element doesn't exist, showIfUnintendedOrphan will show the tour step as an orphan. This ensures
+		your tour step will always be shown.
+
+		delayOnElement takes priority over showIfUnintendedOrphan. I.e.: if you specify both delayOnElement and showIfUnintendedOrphan, the delay will timeout
+		before the step will be shown as an orphan.
+
+		This option is available globally and per step.
+
+			var tourSteps = [
+								{
+									element: "#btnSomething",
+									showIfUnintendedOrphan: true,
+									title: "Always",
+									content: "This tour step will always appear, either against element btnSomething if it exists, or as an orphan if it doesn't"
+								},
+								{
+									element: "#btnSomethingElse",
+									showIfUnintendedOrphan: true,
+									delayOnElement:	{
+														delayElement: "element" // use string literal "element" to wait for this step's element, i.e.: #btnSomethingElse
+													},
+									title: "Always after a delay",
+									content: "This tour step will always appear. If element btnSomethingElse doesn't exist, delayOnElement will wait until it exists. If delayOnElement times out, step will show as an orphan"
+								},
+								{
+									element: "#btnDoesntExist",
+									showIfUnintendedOrphan: true,
+									title: "Always",
+									content: "This tour step will always appear",
+									onElementUnavailable: function() { console.log("this will never get called as showIfUnintendedOrphan will show step as an orphan"); }
+								},
+							]
+
+
+----------------
+
+	17. Overlay divs and customizable transitions between tour steps
+		With huge thanks to @ibastevan, who provided a lot of the code and input to getting this working. Read more here:
+		https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/pull/24
+
+		Tourist now uses overlays to highlight tour step elements. A single backdrop div provides the dark/black background, and a highlight div is used
+		to highlight the element of a tour step. Each tour step element is then adjusted by zindex to pop to the top.
+
+		This option could be considered not exactly simple to understand initially, so please play around with it.
+
+		A new set of options called backdropOptions has been added globally, and can be overridden per step.
+
+		backdropOptions is an object structured as follows (these are the default options, used if you do not set this option in your tour):
+
+			backdropOptions:	{
+									highlightOpacity:	0.8,
+									highlightColor:		#FFF,
+									animation:	{
+													// can be string of css class or function signature: function(domElement, step) {}
+													backdropShow:			function(domElement) { domElement.fadeIn(); },
+													backdropHide:			function(domElement) { domElement.fadeOut("slow") },
+													highlightShow:			function(domElement, step)
+																			{
+																				step.fnPositionHighlight();
+																				domElement.fadeIn();
+																			},
+													highlightTransition:	"tour-highlight-animation",
+													highlightHide:			function(domElement) { domElement.fadeOut("slow") }
+												},
+								}
+
+		- Explanation - backdropOptions:
+
+			backdropOptions.highlightOpacity	- the alpha value of the div used to highlight the step element. You can control how visible/occluded the element is.
+			backdropOptions.highlightColor		- the hex color code for the highlight. Normally you will want to use a white highlight (#FFF). However if your step element
+													has a dark or black background, you may want to use a black highlight (#000). Experiment with the best colors for your UX.
+
+
+		- Explanation - backdropOptions.animation:
+
+			The options within backdropOptions.animation can be either string literals specifying a CSS class, or a function. The application of these
+			features work in exactly the same way for all backdropOptions.animation options.
+
+			These options apply as per the following:
+				backdropShow:			when a previously hidden backdrop is shown
+				backdropHide:			when a previously visible backdrop is hidden
+				highlightShow:			when step N did not have an element, and step N+1 does have an element
+				highlightHide:			when step N has an element, and step N+1 does not have an element
+				highlightTransition:	when both step N and step N+1 have an element, and the highlight is visibly moved from one to the other
+
+
+			The highlight is the div that creates the "visibility" effect over a tour step element. This option is how a nice slide/move/transition effect
+			between steps is possible. They also now allow handling of rotated elements etc.
+
+
+			- If a CSS class name (as a string literal) is provided:
+				If you provide a CSS class, this class will be applied to the specified element at the specified time and removed afterwards. You can use this
+				class to add transition effects.
+
+				For example, assume you create a class in your CSS that animates an effect as follows:
+
+						.my-custom-animation {
+						  -webkit-transition: all .5s ease-out;
+						  -moz-transition: all .5s ease-out;
+						  -ms-transition: all .5s ease-out;
+						  -o-transition: all .5s ease-out;
+						  transition: all .5s ease-out;
+						}
+
+				You can then use this effect every time the background overlay div is shown by specifying it as follows:
+
+				var tour = new Tour({
+										steps:	[ .....	],
+										backdropOptions:	{
+																animation:	{
+																				backdropShow: "my-custom-animation"
+																			},
+															}
+									});
+
+				Now, when moving between step N where step option backdrop == false, and step N + 1 where step option backdrop == true, your class will be used
+				to implement the transition. The class will be added before the backdrop is shown, and removed when the transition is complete. In other words,
+				specifying a CSS class for backdropShow is functionally equivalent to the following code executed when the tour moves between steps:
+
+					$(backdropOptions element).addClass("my-custom-animation");
+					$(backdropOptions element).show(0,	function()
+												{
+													$(this).removeClass("my-custom-animation");
+												});
+
+				Note that the class is removed after the element is visible, therefore only use this option for CSS transitions - do not use it for
+				"persistent" CSS changes.
+
+				The same approach applies to all the other options, i.e.: if a class is specified for highlightTransition, the class is applied, the highlight
+				div is moved to its new position, and the class is removed.
+
+
+
+			- If a function is provided:
+
+				If you provide a function, your code is 100% responsible for positioning and showing the highlight overlay element.
+
+				It's more hassle - why would you want to do this? Simply, Tourist can only provide a fairly standard/default set of transitions, especially where
+				the highlightTransition option is concerned. If you want your tour to have an especially fancy or featured/custom transition, you can use this option
+				to achieve that. You can also work with rotated or transformed elements using this feature.
+
+				Most of the time you will not need to use this option, and specifying a CSS class will be sufficient. But the option is here if you need it.
+
+				When specifying a function, it must have the following signature:
+					function(domElement, step)
+					{
+					}
+
+				The domElement parameter provides a jquery object for the element you must manipulate. For example, if you have specified a function for
+				backdropOptions.animation.highlightShow, then domElement will be the highlighting div. You must then correctly position and show this div over the
+				step element.
+
+				The step parameter provides an object with information about the step, to help you decide how to execute the transition. It has the following props,
+				most of which are taken from your tour step. They are re-provided to you for ease, in case you want to create some clever central animation
+				feature etc:
+
+				step =	{
+							element:				the actual step element, even if the tour uses a function for this step.element option
+							container:				the container option (string) as specified in the step or globally, to help you decide how to set up the transition
+							backdrop:				as per step option (bool),
+							preventInteraction:		as per step option (bool),
+							isOrphan:				whether is step is actually an orphan, because the element was wrong and showIfUnintendedOrphan == true or for some other reason (bool),
+							orphan:					as per step option (bool),
+							showIfUnintendedOrphan:	as per step option (bool),
+							duration:				as per step option (bool),
+							delay:					as per step option (bool),
+							fnPositionHighlight:	a helper function to position the highlight element
+						};
+
+				The fnPositionHighlight option is provided to make it easy for you to automatically position the highlight div on top of the tour step element. The
+				function simply performs the following:
+
+					function fnPositionHighlight()
+					{
+						$(DOMID_HIGHLIGHT).width(_stepElement.outerWidth()).height(_stepElement.outerHeight()).offset(_stepElement.offset());
+					}
+
+				This allows you to do the following in your customized transition code:
+
+					function(domElement, step)
+					{
+						// do whatever setup for your custom transition
+						step.fnPositionHighlight();
+					}
+
+				It simply saves some typing.
+
+
+		An example of implementing backdropOptions -
+
+		Per step option:
+
+			var tourSteps = [
+								{
+									element: "#btnSomething",
+									title: "Default",
+									content: "This tour step will use the default Tour.backdropOptions settings"
+								},
+								{
+									orphan: true,
+									title: "Default",
+									content: "This tour step will use the per step transitions as specified"
+									backdropOptions:	{
+															// specify some options and use the defaults for the rest
+															highlightColor:		#000,	// this step element has a black background, so this RGB looks better
+															animation:	{
+																			// use a function to manually hide the highlight - of course this will only apply
+																			// because this step is an orphan == true, and therefore there is no highlight to hide
+																			highlightHide:			function(domElement, step)
+																									{
+																										domElement.fadeOut("slow")
+																									}
+																		},
+														}
+								},
+
+
+		Global options:
+
+			var tour = new Tour({
+									steps:	[ .....	],
+									backdropOptions:	{
+															// default for all Tour steps
+														}
+								});
  *
  */
 
@@ -644,6 +919,10 @@
 		return window.Tour = factory(window.jQuery);
 	}
 })(window, function ($) {
+
+	const DOMID_BACKDROP = "#tourBackdrop";
+	const DOMID_HIGHLIGHT = "#tourHighlight";
+	const DOMID_PREVENT = "#tourPrevent";
 
 	var Tour, document, objTemplates, objTemplatesButtonTexts;
 
@@ -685,7 +964,7 @@
 										};
 
 
-			// take default options and overwrite with this tour options
+			// GLOBAL OPTIONS take default options and overwrite with this tour options
 			this._options = $.extend(true,
 									{
 										name: 'tour',
@@ -697,9 +976,36 @@
 										debug: false,
 										backdrop: false,
 										backdropContainer: 'body',
-										backdropPadding: 0,
+										backdropOptions:	{
+																highlightOpacity:			0.9,
+																highlightColor:				"#FFF",
+																animation:	{
+																				// can be string of css class or function signature: function(domElement, step) {}
+																				backdropShow:			function(domElement, step)
+																										{
+																											domElement.fadeIn();
+																										},
+																				backdropHide:			function(domElement, step)
+																										{
+																											domElement.fadeOut("slow")
+																										},
+																				highlightShow:			function(domElement, step)
+																										{
+																											// calling step.fnPositionHighlight() is the same as:
+																											// domElement.width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
+																											step.fnPositionHighlight();
+																											domElement.fadeIn();
+																										},
+																				highlightTransition:	"tour-highlight-animation",
+																				highlightHide:			function(domElement, step)
+																										{
+																											domElement.fadeOut("slow")
+																										}
+																			},
+															},
 										redirect: true,
 										orphan: false,
+										showIfUnintendedOrphan: false,
 										duration: false,
 										delay: false,
 										basePath: '',
@@ -733,6 +1039,10 @@
 										onModalHidden: null, // function(tour, stepNumber) {}
 									}, options);
 
+			if($(this._options.backdropContainer).length == 0)
+			{
+				this._options.backdropContainer = "body";
+			}
 
 			if(this._options.framework !== "bootstrap3" && this._options.framework !== "bootstrap4")
 			{
@@ -876,13 +1186,16 @@
 					this._options.steps[i].element = this._options.steps[i].element();
 				}
 
-				// Set per step options: take the global options then override with this step's options.
+				// PER STEP OPTIONS: take the global options then override with this step's options.
 				this._options.steps[i] =  $.extend(true,
 														{
 															id: "step-" + i,
 															path: '',
 															host: '',
 															placement: 'right',
+															positioning:{
+																			adjustRelative: null
+																		},
 															title: '',
 															content: '<p></p>',
 															next: i === this._options.steps.length - 1 ? -1 : i + 1,
@@ -891,14 +1204,14 @@
 															container: this._options.container,
 															autoscroll: this._options.autoscroll,
 															backdrop: this._options.backdrop,
-															backdropContainer: this._options.backdropContainer,
-															backdropPadding: this._options.backdropPadding,
+															//backdropOptions: this._options.backdropOptions, << SEE BELOW
 															redirect: this._options.redirect,
-															reflexElement: this._options.steps[i].element,
 															preventInteraction: false,
 															orphan: this._options.orphan,
+															showIfUnintendedOrphan: this._options.showIfUnintendedOrphan,
 															duration: this._options.duration,
 															delay: this._options.delay,
+															delayOnElement:	null,
 															template: this._options.template,
 															showProgressBar: this._options.showProgressBar,
 															showProgressText: this._options.showProgressText,
@@ -923,6 +1236,9 @@
 														},
 														this._options.steps[i]
 													);
+
+				// required so we don't overwrite the global options.
+				this._options.steps[i].backdropOptions = $.extend(true, {}, this._options.backdropOptions, this._options.steps[i].backdropOptions);
 
 				return this._options.steps[i];
 			}
@@ -977,6 +1293,9 @@
 			// Tour restart() simply removes the step from local storage
 			this.setCurrentStep();
 
+			// Create the backdrop and highlight divs
+            this._createOverlayElements();
+
 			this._initMouseNavigation();
 			this._initKeyboardNavigation();
 
@@ -1030,9 +1349,13 @@
 			return this._callOnPromiseDone(promise, this.showStep, i);
 		};
 
-		Tour.prototype.end = function () {
+		Tour.prototype.end = function ()
+		{
+			this._debug("Tour.end() called");
+
 			var endHelper,
 			promise;
+
 			endHelper = (function (_this) {
 				return function (e) {
 					$(document).off("click.tour-" + _this._options.name);
@@ -1041,6 +1364,9 @@
 					$(window).off("scroll.tour-" + _this._options.name);
 					_this._setState('end', 'yes');
 					_this._clearTimer();
+					$(".tour-step-element-reflex").removeClass("tour-step-element-reflex");
+                    _this._hideBackdrop();
+					_this._destroyOverlayElements();
 
 					if (_this._options.onEnd != null)
 					{
@@ -1088,15 +1414,20 @@
 			this._paused = false;
 			this._start = new Date().getTime();
 			this._duration = this._duration || step.duration;
-			this._timer = window.setTimeout((function (_this) {
-						return function () {
-							if (_this._isLast()) {
-								return _this.next();
-							} else {
-								return _this.end();
-							}
-						};
-					})(this), this._duration);
+			this._timer = window.setTimeout((	function (_this)
+												{
+													return	function ()
+															{
+																if (_this._isLast())
+																{
+																	return _this.end();
+																}
+																else
+																{
+																	return _this.next();
+																}
+												};
+											})(this), this._duration);
 			this._debug("Started step " + (this._current + 1) + " timer with duration " + this._duration);
 			if ((step.onResume != null) && this._duration !== step.duration) {
 				return step.onResume(this, this._duration);
@@ -1160,10 +1491,11 @@
 
 					if (step.reflex)
 					{
-						$(step.reflexElement).removeClass('tour-step-element-reflex').off((_this._reflexEvent(step.reflex)) + ".tour-" + _this._options.name);
+						$element.removeClass('tour-step-element-reflex').off((_this._reflexEvent(step.reflex)) + ".tour-" + _this._options.name);
 					}
 
-					_this._hideOverlayElement(step);
+					// now handled by updateOverlayElements
+                    //_this._hideOverlayElements(step);
 					_this._unfixBootstrapSelectPickerZindex(step);
 
 					// If this step was pointed at a modal, revert changes to the step.element. See the notes in showStep for explanation
@@ -1249,7 +1581,7 @@
 			}
 
 			// will be set to element <div class="modal"> if modal in use
-			$modalObject = null;
+			var $modalObject = null;
 
 			// is element a modal?
 			if(step.orphan === false && ($(step.element).hasClass("modal") || $(step.element).data('bs.modal')))
@@ -1277,15 +1609,17 @@
 
 			$element = $(step.element);
 
-			// is element inside a modal?
+			// is element inside a modal? Find the parent modal
 			if($modalObject === null && $element.parents(".modal:first").length)
 			{
 				// find the parent modal div
 				$modalObject = $element.parents(".modal:first");
 			}
 
+			// Is this step a modal?
 			if($modalObject && $modalObject.length > 0)
 			{
+				// Yes, set up the modal helper - called when the modal is hidden. This enables the onModalHidden tour option.
 				this._debug("Modal identified, onModalHidden callback available");
 
 				// store the modal element for other calls
@@ -1302,9 +1636,7 @@
 												{
 													// if step onModalHidden returns false, do nothing. returns int, move to the step specified.
 													// Otherwise continue regular next/end functionality
-													var rslt;
-
-													rslt = step.onModalHidden(_this, i);
+													var rslt = step.onModalHidden(_this, i);
 
 													if(rslt === false)
 													{
@@ -1325,13 +1657,16 @@
 
 												$_modalObject.off("hidden.bs.modal", funcModalHelper);
 
+												// thanks to @eformx for finding this bug!
 												if (_this._isLast())
 												{
-													return _this.next();
+													_this._debug("Modal close reached end of tour");
+													return _this.end();
 												}
 												else
 												{
-													return _this.end();
+													_this._debug("Modal close: next step called");
+													return _this.next();
 												}
 											};
 										}(this, $modalObject);
@@ -1339,46 +1674,63 @@
 				$modalObject.off("hidden.bs.modal", funcModalHelper).on("hidden.bs.modal", funcModalHelper);
 			}
 
-			// Helper function to actually show the popover using _showPopoverAndOverlay
-			showStepHelper = (function (_this) {
-				return function (e) {
-					if (_this._isOrphan(step)) {
-						if (step.orphan === false)
-						{
-							_this._debug("Skip the orphan step " + (_this._current + 1) + ".\nOrphan option is false and the element " + step.element + " does not exist or is hidden.");
+			// Helper function to actually show the popover using _showPopoverAndOverlay.
+			// Note the flow - this is called immediately unless delayOnElement is set. If delayOnElement is set, this
+			// func will be called if (a) the element appears, or (b) the element doesn't appear in the timeout.
+			// Therefore this helper func MUST handle unintended orphans
+			showStepHelper = (	function (_this)
+								{
+									return	function (e)
+											{
+												if (_this._isOrphan(step))
+												{
+													// Is this an unintended orphan?
+													if (step.orphan === false && step.showIfUnintendedOrphan === false)
+													{
+														_this._debug("Skip the orphan step " + (_this._current + 1) + ".\nOrphan option is false and the element " + step.element + " does not exist or is hidden.");
 
-							if(typeof(step.onElementUnavailable) == "function")
-							{
-								_this._debug("Calling onElementUnavailable callback");
-								step.onElementUnavailable(_this, _this._current);
-							}
+														if(typeof(step.onElementUnavailable) == "function")
+														{
+															_this._debug("Calling onElementUnavailable callback");
+															step.onElementUnavailable(_this, _this._current);
+														}
 
-							if (skipToPrevious) {
-								_this._showPrevStep(true);
-							} else {
-								_this._showNextStep(true);
-							}
-							return;
-						}
-						_this._debug("Show the orphan step " + (_this._current + 1) + ". Orphans option is true.");
-					}
+														if (skipToPrevious) {
+															_this._showPrevStep(true);
+														} else {
+															_this._showNextStep(true);
+														}
+														return;
+													}
 
-					//console.log(step);
+													if (step.orphan === false && step.showIfUnintendedOrphan === true)
+													{
+														// it's an unintended orphan, and global or step options still want to show it
+														_this._debug("Show the unintended orphan step " + (_this._current + 1) + ". showIfUnintendedOrphan option is true.");
+													}
+													else
+													{
+														// It's an intended orphan
+														_this._debug("Show the orphan step " + (_this._current + 1) + ". Orphans option is true.");
+													}
+												}
 
-					if (step.autoscroll && !_this._isOrphan(step))
-					{
-						_this._scrollIntoView(i);
-					}
-					else
-					{
-						_this._showPopoverAndOverlay(i);
-					}
+												//console.log(step);
 
-					if (step.duration) {
-						return _this.resume();
-					}
-				};
-			})(this);
+												if (step.autoscroll && !_this._isOrphan(step))
+												{
+													_this._scrollIntoView(i);
+												}
+												else
+												{
+													_this._showPopoverAndOverlay(i);
+												}
+
+												if (step.duration) {
+													return _this.resume();
+												}
+											};
+								})(this);
 
 
 			// delay in millisec specified in step options
@@ -1410,7 +1762,7 @@
 							return $(step.delayOnElement.delayElement);
 					};
 					var $delayElement = revalidateDelayElement();
-					
+
 					var delayElementLog = $delayElement.length > 0 ? $delayElement[0].tagName : step.delayOnElement.delayElement;
 
 					var delayMax = (step.delayOnElement.maxDelay ? step.delayOnElement.maxDelay : 2000);
@@ -1551,7 +1903,7 @@
 			// only call the onNext handler if this is a click and NOT an orphan skip due to missing element
 			if (skipOrphan === false &&  step.onNext != null)
 			{
-				rslt = step.onNext(this);
+				var rslt = step.onNext(this);
 
 				if(rslt === false)
 				{
@@ -1584,7 +1936,7 @@
 			// only call the onPrev handler if this is a click and NOT an orphan skip due to missing element
 			if (skipOrphan === false && step.onPrev != null)
 			{
-				rslt = step.onPrev(this);
+				var rslt = step.onPrev(this);
 
 				if(rslt === false)
 				{
@@ -1600,7 +1952,7 @@
 
 		Tour.prototype._debug = function (text) {
 			if (this._options.debug) {
-				return window.console.log("[ Bootstrap Tour: '" + this._options.name + "' ] " + text);
+				return window.console.log("[ Bootstrap Tourist: '" + this._options.name + "' ] " + text);
 			}
 		};
 
@@ -1678,9 +2030,8 @@
 			return isOrphan;
 		};
 
-
 		Tour.prototype._isLast = function () {
-			return this._current < this._options.steps.length - 1;
+			return this._current >= this._options.steps.length - 1;
 		};
 
 		// wraps the calls to show the tour step in a popover and the background overlay.
@@ -1694,11 +2045,13 @@
 			}
 			step = this.getStep(i);
 
-			if (step.backdrop)
-			{
-				this._showOverlayElements(step);
-			}
+			// handles all show, hide and move of the background and highlight
+			this._updateBackdropElements(step);
 
+			// Show the preventInteraction overlay etc
+			this._updateOverlayElements(step);
+
+			// Required to fix the z index issue with BS select dropdowns
 			this._fixBootstrapSelectPickerZindex(step);
 
 			// Ensure this is called last, to allow preceeding calls to check whether current step popover is already visible.
@@ -1745,6 +2098,12 @@
 					// Note: BS4 popper.js requires additional fiddling to work, see below where popOpts object is created
 					step.element = 'body';
 					step.placement = 'top';
+
+					// If step is an intended or unintended orphan, and reflexOnly is set, show a warning.
+					if(step.reflexOnly)
+					{
+						this._debug("Step is an orphan, and reflexOnly is set: ignoring reflexOnly");
+					}
 				}
 
 				$element = $(step.element);
@@ -1754,15 +2113,45 @@
 
 				if (step.reflex && !isOrphan)
 				{
-					$(step.reflexElement).addClass('tour-step-element-reflex').off((this._reflexEvent(step.reflex)) + ".tour-" + this._options.name).on((this._reflexEvent(step.reflex)) + ".tour-" + this._options.name, (function (_this) {
-							return function () {
-								if (_this._isLast()) {
-									return _this.next();
-								} else {
-									return _this.end();
-								}
-							};
+					$element.addClass('tour-step-element-reflex');
+					$element.off((this._reflexEvent(step.reflex)) + ".tour-" + this._options.name).on((this._reflexEvent(step.reflex)) + ".tour-" + this._options.name, (function (_this) {
+							return function ()
+									{
+										if (_this._isLast())
+										{
+											return _this.end();
+										}
+										else
+										{
+											return _this.next();
+										}
+									};
 						})(this));
+
+					if(step.reflexOnly)
+					{
+						// Only disable the next button if this step is NOT an orphan.
+						// This is difficult to achieve robustly because tour creator can use a custom template. Instead of trying to manually
+						// edit the template - which must be a string to be passed to popover creation - use jquery to find the element, hide
+						// it, then use the resulting DOM code/string to search and replace
+
+						// Find "next" object (button, href, etc), create a copy
+						var $objNext = $(step.template).find('[data-role="next"]').clone();
+
+						if($objNext.length)
+						{
+							// Get the DOM code for the object
+							var strNext = $objNext[0].outerHTML;
+
+							$objNext.hide();
+
+							// Get the DOM code for the hidden object
+							var strHidden = $objNext[0].outerHTML;
+
+							// string replace it in the template
+							step.template = step.template.replace(strNext, strHidden);
+						}
+					}
 				}
 
 
@@ -1838,19 +2227,27 @@
 											obj.popper.left = left;
 											obj.popper.right = top + obj.popper.width;
 											return obj;
-										}
+										};
 					}
 					else
 					{
 						// BS3 popover accepts jq object or string literal. BS4 popper.js of course doesn't, just to make life extra irritating.
 						popOpts.selector = "#" + step.element[0].id;
-					}
-				}
 
-				// BS4 / popper.js does not accept a jquery object as element. BS3 popover does!
-				if(this._options.framework == "bootstrap4" && isOrphan == false)
-				{
-					popOpts.selector = "#" + step.element[0].id;
+						// Allow manual repositioning of the popover
+						// THIS DOESN'T WORK - popper.js will only adjust on one axis even if both axis are specified...
+						if(step.positioning.adjustRelative !== null && step.positioning.adjustRelative.length > 0)
+						{
+							if(typeof step.positioning.adjustRelative == "function")
+							{
+								popOpts.offset = step.positioning.adjustRelative();
+							}
+							else
+							{
+								popOpts.offset = step.positioning.adjustRelative;
+							}
+						}
+					}
 				}
 
 				$element.popover(popOpts);
@@ -1936,9 +2333,12 @@
 			if (step.next < 0) {
 				$next.addClass('disabled').prop('disabled', true).prop('tabindex', -1);
 			}
-			if (step.reflexOnly) {
-				$next.hide();
-			}
+			// Cannot do this here due to new option showIfUnintendedOrphan - an unintended orphan with reflex/reflexonly will create a
+			// tour step that can't be moved on from! This must be done in showPopover, which is called after the step is loaded and any
+			// delayOnElement timeouts etc have occurred, meaning we know for certain in _showPopover whether the step is an orphan
+//			if (step.reflexOnly) {
+//				$next.hide();
+//			}
 			if (!step.duration) {
 				$resume.remove();
 			}
@@ -2065,12 +2465,12 @@
 
 		// Note: this method is not required, but remains here in case any future forkers want to reinstate the code that moves a non-orphan popover
 		// when window is scrolled
-		Tour.prototype._onScroll = function (callback, timeout) {
-			return $(window).on("scroll.tour-" + this._options.name, function () {
-				clearTimeout(timeout);
-				return timeout = setTimeout(callback, 100);
-			});
-		};
+//		Tour.prototype._onScroll = function (callback, timeout) {
+//			return $(window).on("scroll.tour-" + this._options.name, function () {
+//				clearTimeout(timeout);
+//				return timeout = setTimeout(callback, 100);
+//			});
+//		};
 
 		Tour.prototype._initMouseNavigation = function () {
 			var _this;
@@ -2114,24 +2514,32 @@
 						if (!e.which) {
 							return;
 						}
-						switch (e.which) {
-						case 39:
-							e.preventDefault();
-							if (_this._isLast()) {
-								return _this.next();
-							} else {
+						switch (e.which)
+						{
+							case 39:
+								e.preventDefault();
+								if(_this._isLast())
+								{
+									return _this.end();
+								}
+								else
+								{
+									return _this.next();
+								}
+								break;
+
+							case 37:
+								e.preventDefault();
+								if (_this._current > 0)
+								{
+									return _this.prev();
+								}
+								break;
+
+							case 27:
+								e.preventDefault();
 								return _this.end();
-							}
-							break;
-						case 37:
-							e.preventDefault();
-							if (_this._current > 0) {
-								return _this.prev();
-							}
-							break;
-						case 27:
-							e.preventDefault();
-							return _this.end();
+								break;
 						}
 					};
 				})(this));
@@ -2207,14 +2615,14 @@
 			if($selectpicker.length > 0 && $selectpicker.parent().hasClass("bootstrap-select"))
 			{
 				this._debug("Fixing Bootstrap SelectPicker");
-				// set zindex to open dropdown over background element
-				$selectpicker.parent().css("z-index", "1101");
+				// set zindex to open dropdown over background element and at zindex of highlight element
+				$selectpicker.parent().css("z-index", "1111");
 
 				// store the element for other calls. Mainly for when step is hidden, selectpicker must be unfixed / z index reverted to avoid visual issues.
 				// storing element means we don't need to find it again later
 				this._setStepFlag(this.getCurrentStepIndex(), "elementBootstrapSelectpicker", $selectpicker);
 			}
-		}
+		};
 
 		// Revert the Z index between Tour overlay and popoper
  		Tour.prototype._unfixBootstrapSelectPickerZindex = function(step)
@@ -2226,125 +2634,401 @@
 				// set zindex to open dropdown over background element
 				$selectpicker.parent().css("z-index", "auto");
 			}
-		}
+		};
 
-		// Shows the preventInteraction div, and the background divs
-		Tour.prototype._showOverlayElements = function (step) {
-			var elementData,
-				isRedraw;
 
-			// check if the popover for the current step already exists (is this a redraw)
-			if($(document).find(".popover.tour-" + this._options.name + ".tour-" + this._options.name + "-" + this.getCurrentStepIndex()).length == 0)
+		// ===================================================================================================================================================
+		// NEW OVERLAY CODE
+		//
+		// NOTE: "backdrop" refers to all the elements required to create the "dark background with a highlight" function, i.e.: a background div and
+		// a highlight div.
+		// ===================================================================================================================================================
+
+		// Actually creates the 3 divs for functionality
+		Tour.prototype._createOverlayElements = function ()
+        {
+			// the .substr(1) is because the DOMID_ consts start with # for jq object ease...
+			var $backdrop = $('<div class="tour-backdrop" id="' + DOMID_BACKDROP.substr(1) + '"></div>');
+            var $highlight = $('<div class="tour-highlight" id="' + DOMID_HIGHLIGHT.substr(1) + '" style="width:0px;height:0px;top:0px;left:0px;"></div>');
+
+			// _updateOverlayElements creates and destroys prevent div as required
+            //var $preventDiv = $('<div class="tour-prevent" id="' + DOMID_PREVENT.substr(1) + '" style="width:0px;height:0px;top:0px;left:0px;"></div>');
+
+            //var $debug = $('<!-- debug -->');
+			//$("body").append($debug);
+
+            if ($(DOMID_BACKDROP).length === 0)
+            {
+                $(this._options.backdropContainer).append($backdrop);
+            }
+            if ($(DOMID_HIGHLIGHT).length === 0)
+            {
+                $(this._options.backdropContainer).append($highlight);
+            }
+
+//            if ($(DOMID_PREVENT).length === 0)
+//            {
+//                $(this._options.backdropContainer).append($preventDiv);
+//            }
+        };
+
+		Tour.prototype._destroyOverlayElements = function(step)
+        {
+			$(DOMID_BACKDROP).remove();
+			$(DOMID_HIGHLIGHT).remove();
+			$(DOMID_PREVENT).remove();
+
+			$(".tour-highlight-element").removeClass("tour-highlight-element");
+		};
+
+		// Hides the background and highlight. Caller is responsible for ensuring step wants hidden
+		// backdrop
+		Tour.prototype._hideBackdrop = function(step)
+        {
+			var step = step || null;
+
+			if(step)
 			{
-				// not a redraw - could be a new step (i.e.: moving to the next step), or could be the result of a window resize event, which destroys the
-				// old popover
-				isRedraw = false;
+				// No backdrop? No need for highlight
+				this._hideHighlightOverlay(step);
+
+				// Does global or this step specify a function for the backdrop layer hide?
+				if(typeof step.backdropOptions.animation.backdropHide == "function")
+				{
+					// pass DOM element jq object to function
+					step.backdropOptions.animation.backdropHide($(DOMID_BACKDROP));
+				}
+				else
+				{
+					// must be a CSS class
+					$(DOMID_BACKDROP).addClass(step.backdropOptions.animation.backdropHide);
+					$(DOMID_BACKDROP).hide(0,	function()
+												{
+													$(this).removeClass(step.backdropOptions.animation.backdropHide);
+												});
+				}
+
 			}
 			else
 			{
-				// Yes. Likely this is because of a window scroll event
-				isRedraw = true;
-
-				return;
+				$(DOMID_BACKDROP).hide(0);
+				$(DOMID_HIGHLIGHT).hide(0);
 			}
+        };
 
-			if(step.preventInteraction && !isRedraw)
+		// Shows the backdrop (backdrop + highlight elements if not orphan). Caller is responsible for ensuring step really wants a visible
+		// backdrop
+		Tour.prototype._showBackdrop = function (step)
+        {
+			var step = step || null;
+
+			// Ensure we're always starting with a clean, hidden backdrop - this ensures any previous step.backdropOptions.animation.* functions
+			// haven't messed with the classes
+			$(DOMID_BACKDROP).removeClass().addClass("tour-backdrop").hide(0);
+
+			if(step)
 			{
-				$(step.backdropContainer).append("<div class='tour-prevent' id='tourPrevent'></div>");
-				$("#tourPrevent").width($(step.element).outerWidth());
-				$("#tourPrevent").height($(step.element).outerHeight());
-				$("#tourPrevent").offset($(step.element).offset());
-			}
+				// Does global or this step specify a function for the backdrop layer show?
+				if(typeof step.backdropOptions.animation.backdropShow == "function")
+				{
+					// pass DOM element jq object to function
+					step.backdropOptions.animation.backdropShow($(DOMID_BACKDROP));
+				}
+				else
+				{
+					// must be a CSS class
+					$(DOMID_BACKDROP).addClass(step.backdropOptions.animation.backdropShow);
+					$(DOMID_BACKDROP).show(0,	function()
+												{
+													$(this).removeClass(step.backdropOptions.animation.backdropShow);
+												});
+				}
 
-			docHeight = $(document).height();
-			docWidth = $(document).width();
 
-			if ($(step.element).length === 0 || this._isOrphan(step))
-			{
-				var $backdrop = $('<div class="tour-backdrop tour-backdrop-orphan"></div>');
-				$backdrop.offset({top: 0, left: 0});
-				$backdrop.width(docWidth);
-				$backdrop.height(docHeight);
-				$("body").append($backdrop);
+				// Now handle the highlight layer. The backdrop and highlight layers operate together to create the visual backdrop, but are handled
+				// as separate DOM and code elements.
+				if(this._isOrphan(step))
+				{
+					// Orphan step will never require a highlight, as there's no element
+					if($(DOMID_HIGHLIGHT).is(':visible'))
+					{
+						this._hideHighlightOverlay(step);
+					}
+					else
+					{
+						// orphan step with highlight layer already hidden - do nothing
+					}
+				}
+				else
+				{
+					// Not an orphan, so requires a highlight layer.
+					if($(DOMID_HIGHLIGHT).is(':visible'))
+					{
+						// Already visible, so this is a transition - move from 1 position to another. This shouldn't be possible,
+						// as a call to showBackdrop() logically means the backdrop is hidden, therefore the highlight is hidden. Kept for safety.
+						this._positionHighlightOverlay(step);
+					}
+					else
+					{
+						// Not visible, this is a show
+						this._showHighlightOverlay(step);
+					}
+				}
+
 			}
 			else
 			{
-				elementData =	{
-									width: $(step.element).innerWidth(),
-									height: $(step.element).innerHeight(),
-									offset: $(step.element).offset()
+				$(DOMID_BACKDROP).show(0);
+				$(DOMID_HIGHLIGHT).show(0);
+			}
+        };
+
+		// Creates an object representing the current step with a subset of properties and functions, for
+		// tour creator to use when passing functions to step.backdropOptions.animation options
+		Tour.prototype._createStepSubset = function (step)
+		{
+			var _this = this;
+			var _stepElement = $(step.element);
+
+			var stepSubset =	{
+									element:				_stepElement,
+									container:				step.container,
+									autoscroll:				step.autoscroll,
+									backdrop:				step.backdrop,
+									preventInteraction:		step.preventInteraction,
+									isOrphan:				this._isOrphan(step),
+									orphan:					step.orphan,
+									showIfUnintendedOrphan:	step.showIfUnintendedOrphan,
+									duration:				step.duration,
+									delay:					step.delay,
+									fnPositionHighlight:	function()
+															{
+																_this._debug("Positioning highlight (fnPositionHighlight) over step element " + _stepElement[0].id + ":\nWidth = " + _stepElement.outerWidth() + ", height = " + _stepElement.outerHeight() + "\nTop: " + _stepElement.offset().top + ", left: " + _stepElement.offset().left);
+																$(DOMID_HIGHLIGHT).width(_stepElement.outerWidth()).height(_stepElement.outerHeight()).offset(_stepElement.offset());
+															},
+
 								};
 
-				if (step.backdropPadding)
-				{
-					elementData = this._applyBackdropPadding(step.backdropPadding, elementData);
-				}
-
-				var $backdropTop	= $('<div class="tour-backdrop top"></div>');
-				$backdropTop.offset({top: 0, left: 0});
-				$backdropTop.width(docWidth);
-				$backdropTop.height(elementData.offset.top);
-
-				var $backdropLeft	= $('<div class="tour-backdrop left"></div>');
-				$backdropLeft.width(elementData.offset.left);
-				$backdropLeft.height(elementData.height);
-				$backdropLeft.offset({top: elementData.offset.top, left: 0});
-
-				var $backdropRight	= $('<div class="tour-backdrop right"></div>');
-				$backdropRight.width(docWidth - (elementData.width + elementData.offset.left));
-				$backdropRight.height(elementData.height);
-				$backdropRight.offset({top: elementData.offset.top, left: elementData.offset.left + elementData.width});
-
-				var $backdropBottom = $('<div class="tour-backdrop bottom"></div>');
-				$backdropBottom.width(docWidth);
-				$backdropBottom.height(docHeight - elementData.offset.top - elementData.height);
-				$backdropBottom.offset({top: elementData.offset.top + elementData.height, left: 0});
-
-				$(step.backdropContainer).append($backdropTop);
-				$(step.backdropContainer).append($backdropLeft);
-				$(step.backdropContainer).append($backdropRight);
-				$(step.backdropContainer).append($backdropBottom);
-			}
+			return stepSubset;
 		};
 
-		Tour.prototype._hideOverlayElement = function (step)
+
+		// Shows the highlight and applies class to highlighted element
+		Tour.prototype._showHighlightOverlay = function (step)
 		{
-			// remove any previous interaction overlay
-			if($("#tourPrevent").length)
+			// safety check, ensure no other elem has the highlight class
+			var $elemTmp = $(".tour-highlight-element");
+			if($elemTmp.length > 0)
 			{
-				$("#tourPrevent").remove();
+				$elemTmp.removeClass('tour-highlight-element');
 			}
 
-			$(".tour-backdrop").remove();
+			// Is this a modal - we must set the zindex on the modal element, not the modal-content element
+			var $modalCheck = $(step.element).parents(".modal:first");
+			if($modalCheck.length)
+			{
+				$modalCheck.addClass('tour-highlight-element');
+			}
+			else
+			{
+				$(step.element).addClass('tour-highlight-element');
+			}
+
+			// Ensure we're always starting with a clean, hidden highlight - this ensures any previous step.backdropOptions.animation.* functions
+			// haven't messed with the classes
+			$(DOMID_HIGHLIGHT).removeClass().addClass("tour-highlight").hide(0);
+
+			if(typeof step.backdropOptions.animation.highlightShow == "function")
+			{
+				// pass DOM element jq object to function. Function is completely responsible for positioning and showing.
+				// dupe the step to avoid function messing with original object.
+				step.backdropOptions.animation.highlightShow($(DOMID_HIGHLIGHT), this._createStepSubset(step));
+			}
+			else
+			{
+				// must be a CSS class. Give a default animation
+				$(DOMID_HIGHLIGHT).css(	{
+											"opacity": step.backdropOptions.highlightOpacity,
+											"background-color": step.backdropOptions.highlightColor
+										});
+
+				$(DOMID_HIGHLIGHT).width(0).height(0).offset({ top: 0, left: 0 });
+				$(DOMID_HIGHLIGHT).show(0);
+				$(DOMID_HIGHLIGHT).addClass(step.backdropOptions.animation.highlightShow);
+
+				$(DOMID_HIGHLIGHT).width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
+				$(DOMID_HIGHLIGHT).one('webkitAnimationEnd oanimationend msAnimationEnd animationend',  function()
+																										{
+																											$(DOMID_HIGHLIGHT).removeClass(step.backdropOptions.animation.highlightShow);
+																										});
+			}
 		};
 
-		Tour.prototype._applyBackdropPadding = function (padding, data)
+		// Repositions a currently visible highlight
+		Tour.prototype._positionHighlightOverlay = function (step)
 		{
-			if (typeof padding === 'object') {
-				if (padding.top == null) {
-					padding.top = 0;
-				}
-				if (padding.right == null) {
-					padding.right = 0;
-				}
-				if (padding.bottom == null) {
-					padding.bottom = 0;
-				}
-				if (padding.left == null) {
-					padding.left = 0;
-				}
-				data.offset.top = data.offset.top - padding.top;
-				data.offset.left = data.offset.left - padding.left;
-				data.width = data.width + padding.left + padding.right;
-				data.height = data.height + padding.top + padding.bottom;
-			} else {
-				data.offset.top = data.offset.top - padding;
-				data.offset.left = data.offset.left - padding;
-				data.width = data.width + (padding * 2);
-				data.height = data.height + (padding * 2);
+			// safety check, ensure no other elem has the highlight class
+			var $elemTmp = $(".tour-highlight-element");
+			if($elemTmp.length > 0)
+			{
+				$elemTmp.removeClass('tour-highlight-element');
 			}
-			return data;
+
+			// Is this a modal - we must set the zindex on the modal element, not the modal-content element
+			var $modalCheck = $(step.element).parents(".modal:first");
+			if($modalCheck.length)
+			{
+				$modalCheck.addClass('tour-highlight-element');
+			}
+			else
+			{
+				$(step.element).addClass('tour-highlight-element');
+			}
+
+			if(typeof step.backdropOptions.animation.highlightTransition == "function")
+			{
+				// Don't clean existing classes - this allows tour coder to fully control the highlight between steps
+
+				// pass DOM element jq object to function. Function is completely responsible for positioning and showing.
+				// dupe the step to avoid function messing with original object.
+				step.backdropOptions.animation.highlightTransition($(DOMID_HIGHLIGHT), this._createStepSubset(step));
+			}
+			else
+			{
+				// must be a CSS class. Start by cleaning all other classes
+				$(DOMID_HIGHLIGHT).removeClass().addClass("tour-highlight");
+
+				// obey step options
+				$(DOMID_HIGHLIGHT).css(	{
+											"opacity": step.backdropOptions.highlightOpacity,
+											"background-color": step.backdropOptions.highlightColor
+										});
+
+				// add transition animations
+				$(DOMID_HIGHLIGHT).addClass(step.backdropOptions.animation.highlightTransition);
+				$(DOMID_HIGHLIGHT).width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
+				$(DOMID_HIGHLIGHT).one('webkitAnimationEnd oanimationend msAnimationEnd animationend',  function()
+																										{
+																											$(DOMID_HIGHLIGHT).removeClass(step.backdropOptions.animation.highlightTransition);
+																										});
+			}
 		};
+
+		Tour.prototype._hideHighlightOverlay = function (step)
+		{
+			// remove the highlight class
+			$(".tour-highlight-element").removeClass('tour-highlight-element');
+
+			if(typeof step.backdropOptions.animation.highlightHide == "function")
+			{
+				// pass DOM element jq object to function. Function is completely responsible for positioning and showing.
+				// dupe the step to avoid function messing with original object.
+				step.backdropOptions.animation.highlightHide($(DOMID_HIGHLIGHT), this._createStepSubset(step));
+			}
+			else
+			{
+				// must be a CSS class
+				$(DOMID_HIGHLIGHT).addClass(step.backdropOptions.animation.highlightHide);
+				//$(DOMID_HIGHLIGHT).width(0).height(0).offset({ top: 0, left: 0 });
+				$(DOMID_HIGHLIGHT).one('webkitAnimationEnd oanimationend msAnimationEnd animationend',  function()
+																										{
+																											// ensure we end with a clean div
+																											$(DOMID_HIGHLIGHT).removeClass().addClass("tour-highlight");
+																											$(DOMID_HIGHLIGHT).hide(0);
+																										});
+			}
+		};
+
+		// Moves, shows or hides the backdrop and highlight element to match the specified step
+		Tour.prototype._updateBackdropElements = function (step)
+        {
+			// Change to backdrop visibility required? (step.backdrop != current $(DOMID_BACKDROP) visibility)
+			if(step.backdrop != $(DOMID_BACKDROP).is(':visible'))
+			{
+				// step backdrop not in sync with actual backdrop. Deal with it!
+				if(step.backdrop)
+				{
+					// handles both the background div and the highlight layer
+					this._showBackdrop(step);
+				}
+				else
+				{
+					this._hideBackdrop(step);
+				}
+			}
+			else
+			{
+				// backdrop is in the correct state (visible/non visible) for this step
+				if(step.backdrop)
+				{
+					// Step includes backdrop, and backdrop is already visible.
+					// Is this step an orphan (i.e.: no highlight)?
+					if(this._isOrphan(step))
+					{
+						// Orphan doesn't require highlight as no element. Is the highlight currently visible? (from the previous step)
+						if($(DOMID_HIGHLIGHT).is(':visible'))
+						{
+							// Need to hide it
+							this._hideHighlightOverlay(step);
+						}
+						else
+						{
+							// Highlight not visible, not required. Do nothing.
+						}
+					}
+					else
+					{
+						// Highlight required
+						if($(DOMID_HIGHLIGHT).is(':visible'))
+						{
+							// Transition it
+							this._positionHighlightOverlay(step);
+						}
+						else
+						{
+							// Show it
+							this._showHighlightOverlay(step);
+						}
+					}
+				}
+				else
+				{
+					// Step does not include backdrop, backdrop is already hidden.
+					// Ensure highlight is also hidden - safety check as hideBackdrop also hides highlight
+					if($(DOMID_HIGHLIGHT).is(':visible'))
+					{
+						this._hideHighlightOverlay(step);
+					}
+				}
+			}
+        };
+
+		// Updates visibility of the preventInteraction div and any other overlay elements added in future features
+		Tour.prototype._updateOverlayElements = function (step)
+		{
+			// check if the popover for the current step already exists (is this a redraw)
+			if (step.preventInteraction)
+			{
+                this._debug("preventInteraction == true, adding overlay");
+				if ($(DOMID_PREVENT).length === 0)
+				{
+                    $('<div class="tour-prevent" id="' + DOMID_PREVENT.substr(1) + '" style="width:0px;height:0px;top:0px;left:0px;"></div>').insertAfter(DOMID_HIGHLIGHT);
+                }
+
+                $(DOMID_PREVENT).width($(step.element).outerWidth()).height($(step.element).outerHeight()).offset($(step.element).offset());
+            }
+			else
+			{
+                $(DOMID_PREVENT).remove();
+            }
+
+		};
+
+
+		// ===================================================================================================================================================
+		// END NEW OVERLAY CODE
+		// ===================================================================================================================================================
+
 
 		Tour.prototype._clearTimer = function () {
 			window.clearTimeout(this._timer);

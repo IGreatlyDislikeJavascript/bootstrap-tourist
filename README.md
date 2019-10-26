@@ -14,12 +14,27 @@ Tourist works with Bootstrap 3 and 4 (specify "framework" option), however the "
 
 ## Changelog from previous version:
 
-Changes IN v0.2.0:
-- Version update as major fix to bug preventing element: function(){...} feature under BS4/popper.js
-- published as release
+Changes in v0.3.0
+- MAJOR REVISION: new method of backdrop and highlight added, with major effort and code from @ibastevan.
 
 Full changelog can be found in the top of bootstrap-tourist.js
 
+v0.3.0 represents a significant change to Bootstrap Tourist.
+
+Tourist is still completely drop-in replacement compatible with original Tour,
+however @ibastevan and @IGreatlyDislikeJavascript have made significant changes
+to how the backdrop works. You can read the conversation here:
+https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/pull/24
+
+In short, previous versions of Tourist (and original Tour) used 4 divs to bracket
+the tour step elements.
+
+From v0.3.0, Tourist now uses overlays to produce the same effect. This solves
+many problems and enables many new features, including customizable transitions
+between tour steps.
+
+There may be residual bugs from this change so please report them in
+the repo!
 
 ## Getting started with Bootstrap Tourist
 Simply include bootstrap-tourist.js and bootstrap-tourist.css into your page. A minified version is not provided because the entire purpose of this repo is to enable fixes, features and native port to ES6. If you are uncomfortable with this, please use the original Bootstrap Tour!
@@ -104,6 +119,10 @@ The entire purpose of Tourist is to add features and fixes, and migrate to nativ
  14. Added sanitizeWhitelist and sanitizeFunction global options, fixed Bootstrap 3.4.1 breaking change
  15. Added support for changing button texts 
 
+from v0.3.0:
+
+ 16. Added showIfUnintendedOrphan to show a tour step as an orphan if its element doesn't exist, overriding onElementUnavailable
+ 17. Overlay divs and customizable transitions between tour steps
 
 ## Added features & fixes: Documentation
 Full feature documentation below. These supersede any features or structure required by Bootstrap Tour.
@@ -663,15 +682,77 @@ var tour = new Tour({
 You may specify only the labels you want to change. Unspecified labels will remain at their defaults:
 
 ```
-	var tour = new Tour({
-							localization:
-							{
-								buttonTexts:	{
-													endTourButton: 'Adios muchachos'
-												}
-							}
-						});
+var tour = new Tour({
+						localization:
+						{
+							buttonTexts:	{
+												endTourButton: 'Adios muchachos'
+											}
+						}
+					});
 ```
+
+
+### Always show the tour step even if the element doesn't exist, using showIfUnintendedOrphan
+With thanks to @diesl
+
+If a tour step specifies an element, and the element doesn't exist, showIfUnintendedOrphan will show the tour step as an orphan. This ensures
+your tour step will always be shown.
+
+delayOnElement takes priority over showIfUnintendedOrphan. I.e.: if you specify both delayOnElement and showIfUnintendedOrphan, the delay will timeout
+before the step will be shown as an orphan.
+
+This option is available globally and per step.
+
+```
+var tourSteps = [
+					{
+						element: "#btnSomething",
+						showIfUnintendedOrphan: true,
+						title: "Always",
+						content: "This tour step will always appear, either against element btnSomething if it exists, or as an orphan if it doesn't"
+					},
+					{
+						element: "#btnSomethingElse",
+						showIfUnintendedOrphan: true,
+						delayOnElement:	{
+											delayElement: "element" // use string literal "element" to wait for this step's element, i.e.: #btnSomethingElse
+										},
+						title: "Always after a delay",
+						content: "This tour step will always appear. If element btnSomethingElse doesn't exist, delayOnElement will wait until it exists. If delayOnElement times out, step will show as an orphan"
+					},
+					{
+						element: "#btnDoesntExist",
+						showIfUnintendedOrphan: true,
+						title: "Always",
+						content: "This tour step will always appear",
+						onElementUnavailable: function() { console.log("this will never get called as showIfUnintendedOrphan will show step as an orphan"); }
+					},
+				]
+```
+
+
+### Customizable transitions for backdrop and highlight between tour steps
+With huge thanks to @ibastevan, who provided a lot of the code and input to getting this working. Read more here:
+https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/pull/24
+
+Tourist now uses overlays to highlight tour step elements. A single backdrop div provides the dark/black background, and a highlight div is used
+to highlight the element of a tour step. Each tour step element is then adjusted by zindex to pop to the top.
+
+A new set of options called backdropOptions has been added globally, and can be overridden per step. This option could be considered not exactly simple
+to understand! Please read the documentation at the top of bootstrap-tourist.js, which includes a full description of the options and examples on how to use them.
+
+This option can be used to implement the following features:
+- Fancy transitions between tour steps
+- Use of 3rd party plugins such as animate.css for better UX
+- Handling of rotated and transformed tour step elements
+- Intelligent "sign-posting" of tour step elements
+
+And much more. Essentially, you can manipulate the backdrop, highlight and tour step in any way you require by specifying your own functions and using
+the Tourist helpers.
+
+
+
 
 
 ## Contributing
