@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<!-- saved from url=(0029)http://bootstraptour.com/api/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Quick and easy way to build your product tours with Bootstrap Popovers.">
+<title>
+
+    API Documentation · Bootstrap Tourist
+
+</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" crossorigin="anonymous">
+
+<link href="incs/pygments-manni.css" rel="stylesheet">
+<link href="incs/bootstrap-tour.docs.css" rel="stylesheet">
+<link href="../bootstrap-tourist.css" rel="stylesheet">
+
+<body>
+    <a href="https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist" id="github"><img src="incs/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+    <div class="page-header">
+		<a href="http://bootstraptour.com/"><h1>Bootstrap Tourist</h1></a>
+	</div>
+
+
+
+	<section id="intro">
+		<div class="container">
+			<div class="page-header">
+				<h2>Introduction
+					<small>Quick and easy way to build your product tours with Bootstrap Popovers for Bootstrap 3 and 4.</small>
+				</h2>
+			</div>
+			<button id="btnStart" class='btn btn-primary btn-lg'>Start a tour</button>
+			<p>
+				Bootstrap Tourist (called "Tourist" from here) is a fork of Bootstrap Tour, a plugin to create product tours. Tourist is a drop-in replacement
+				for Bootstrap Tour, so if you're already using Tour and want to switch to Tourist (to gain features and fixes etc), simply follow the steps below.
+			</p>
+			<p>
+				The original Bootstrap Tour was written in coffeescript, and had a number of open feature and bug fix requests in the github repo.
+				Bootstrap Tourist is an in-progress effort to move Bootstrap Tour to native ES6, fix some issues and add some requested features.
+				You can read more about why Bootstrap Tourist exists, and why it's not a github fork anymore, here:
+				<a href="https://github.com/sorich87/bootstrap-tour/issues/713">https://github.com/sorich87/bootstrap-tour/issues/713</a>
+			</p>
+			<p>
+				Tourist works with Bootstrap 3 and 4 (specify "framework" option), however the "standalone" non-Bootstrap version is not available
+			</p>
+			<p>
+				Tourist is a community contribution from many fine people, who have all helped add features and fix bugs (because I'm not really a js coder, just a
+				c++/x86 asm coder from the 90s). In no particular order, your use of this fine product is thanks to Github IDs:
+				@ibastevan, @lukaszmn, @DancingDad, @thenewbeat, @bardware, @macroscian, @vneri, @pau1phi11ips. And of course thanks to
+				@sorich87 who wrote the original Tour that Tourist is entirely based upon, and many people in the Tour github repo who suggested features or submitted
+				pull requests that I used to add features to Tourist.
+			</p>
+			<p>
+				A special mention and thanks goes to @ibastevan who is pretty much singlehandedly responsible for the new backdrop solution, and helping lots of
+				people in the repo!
+			</p>
+		</div>
+	</section>
+
+	<section id="contents">
+		<div class="container">
+			<div class="page-header">
+				<h2>Documentation index
+					<small>it's easy, with lots of features</small>
+				</h2>
+			</div>
+			<ul>
+				<li><a href='#gettingstarted'>Getting started</a></li>
+				<li><a href='#firstexample'>First, simple example</a></li>
+				<li><a href='#switchingtour'>Switching from Bootstrap Tour to Bootstrap Tourist</a></li>
+			</ul>
+			<ul>
+				<li><a href='#globaloptions'>Global options (and tour step defaults)</a></li>
+				<li><a href='#stepoptions'>Per-step options</a></li>
+			</ul>
+			<ul>
+				<li><a href='#methods'>Methods and functions</a></li>
+			</ul>
+			<h4>Advanced stuff</h4>
+			<ul>
+				<li><a href='#multipage'>Creating multi-page tours</a></li>
+				<li><a href='#backdropOptions'>Animated transitions using <code>backdropOptions</code></a></li>
+			</ul>
+		</div>
+	</section>
+
+	<section id="docnotes">
+		<div class="container">
+			<div class="page-header">
+				<h2>Extra help and notes
+					<small>there's more docs and examples</small>
+				</h2>
+			</div>
+			<p>
+				These HTML docs are intended to give an overview and quick reference to all Tourist features. Some of the features - especially <code>backdropOptions</code> -
+				are complex. If you need more information, take a look at the top of bootstrap-tourist.js. You'll find extensive documentation and walkthroughs
+				on many features, including example code.
+			</p>
+		</div>
+	</section>
+
+
+	<section id="gettingstarted">
+		<div class="container">
+			<div class="page-header">
+				<h2>Getting Started
+					<small>Easy, and a drop in replacement</small>
+				</h2>
+			</div>
+			<p>
+				Simply include bootstrap-tourist.js and bootstrap-tourist.css into your page.
+			</p>
+			<figure class="highlight">
+				<pre>
+					<code class="language-html" data-lang="html">
+<span class="nt">&lt;link</span> <span class="na">href=</span><span class="s">"bootstrap-tourist.css"</span> <span class="na">rel=</span><span class="s">"stylesheet"</span><span class="nt">&gt;</span>
+...
+<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"bootstrap-tourist.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+					</code>
+				</pre>
+			</figure>
+		</div>
+	</section>
+
+
+	<section id="firstexample">
+		<div class="container">
+			<div class="page-header">
+				<h2>Set up a tour
+					<small>simple example</small>
+				</h2>
+			</div>
+			<p>
+				Create your tour steps and set up Tour. Bootstrap Tourist is a drop-in replacement for Tour.
+			</p>
+			<figure class="highlight">
+				<pre>
+					<code class="language-javascript" data-lang="javascript">
+<span class="c1">// Instance the tour</span>
+<span class="kd">var</span> <span class="nx">tour</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Tour</span><span class="p">({</span>
+<span class="na">framework</span><span class="p">:</span> <span class="s2">"bootstrap3"</span><span class="p">,</span><span class="c1">// or "bootstrap4"</span>
+  <span class="na">steps</span><span class="p">:</span> <span class="p">[</span>
+  <span class="p">{</span>
+	<span class="na">element</span><span class="p">:</span> <span class="s2">"#my-element"</span><span class="p">,</span>
+	<span class="na">title</span><span class="p">:</span> <span class="s2">"Title of my step"</span><span class="p">,</span>
+	<span class="na">content</span><span class="p">:</span> <span class="s2">"Content of my step"</span>
+  <span class="p">},</span>
+  <span class="p">{</span>
+	<span class="na">element</span><span class="p">:</span> <span class="s2">"#my-other-element"</span><span class="p">,</span>
+	<span class="na">title</span><span class="p">:</span> <span class="s2">"Title of my step"</span><span class="p">,</span>
+	<span class="na">content</span><span class="p">:</span> <span class="s2">"Content of my step"</span>
+  <span class="p">}</span>
+<span class="p">]});</span>
+
+<span class="c1">// Important: unlike Bootstrap Tour, <b>do not</b> call tour.init to initialize the tour</span>
+
+<span class="c1">// Start the tour</span>
+<span class="nx">tour</span><span class="p">.</span><span class="nx">start</span><span class="p">();</span>
+					</code>
+				</pre>
+			</figure>
+		</div>
+	</section>
+
+
+	<section id="switchingtour">
+		<div class="container">
+			<div class="page-header">
+				<h2>Switching from Bootstrap Tour to Tourist
+					<small>drop in replacement with 2 changes</small>
+				</h2>
+			</div>
+			<p>
+				If you already have a working tour using Bootstrap Tour, and you want to move to Tourist (because it has some fixes etc), perform the following steps:
+			</p>
+			<ul>
+				<li>Copy over the Tourist CSS and JS, include them instead of Bootstrap Tour</li>
+				<li>If you are using Bootstrap 4, add the following option to your initialization code:<pre>framework: "bootstrap4"</pre></li>
+				<li>Remove any calls to <pre>Tour.init()</pre> - this is no longer required. A warning will be logged to the console if you call it (but nothing will explode,
+					because Tourist is a drop-in replacement).
+			</ul>
+			<p>
+				For example:
+			</p>
+			<figure>
+			<pre>
+				<code>
+var tour = new Tour({
+	name: "tourist",
+	steps:[...steps go here...],
+	debug: true,	// you may wish to turn on debug for the first run through
+	framework: "bootstrap4" // set Tourist to use BS4 compatibility
+});
+
+// <b>do not call init()</b>, simply call start() or restart()
+tour.start();
+				</code>
+			</pre>
+			</figure>
+			<div class="page-header">
+				<h3>Added features and fixes
+					<small>what's in Tourist that isn't in original Tour</small>
+				</h3>
+			</div>
+			<p>
+				Bootstrap Tourist is a drop-in replacement for Tour, but has a lot of extra options. Here's everything that's been added. If you're using Tourist
+				"from new" and not migrating from Tour, don't bother reading this - just go straight to the Options section.
+			</p>
+			<table class="table table-bordered table-striped">
+				<thead>
+					<tr>
+						<th>Feature/fix</th>
+						<th width='65%'>Description</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Tour flow control</td>
+						<td>
+							Returning false from onNext/onPrevious handler will prevent Tour from automatically moving to the next/previous step.
+							Tour flow methods (Tour.goTo() etc) now also work correctly in onNext/onPrevious.
+						</td>
+					</tr>
+					<tr>
+						<td>Dynamically determine element by function</td>
+						<td>
+							Step "element:" option allows a step element to be determined programmatically. Provide a function and return a jquery object.
+						</td>
+					</tr>
+					<tr>
+						<td>Only continue tour when reflex element is clicked</td>
+						<td>
+							Use step option reflexOnly in conjunction with step option reflex to automagically hide the "next" button in the tour, and only
+							continue when the user clicks the element.
+						</td>
+					</tr>
+					<tr>
+						<td>Callback function when step element is missing</td>
+						<td>
+							If the element specified in the step (static or dynamically determined), a function provided to the global or per step
+							option onElementUnavailable is called. This enables robust error handling.
+						</td>
+					</tr>
+					<tr>
+						<td>Scroll flicker / continue reload fixed</td>
+						<td>
+							Original Tour constantly reloaded the current tour step on scroll & similar events. This produced flickering, constant reloads and therefore constant calls to all the step function calls.
+							This is now fixed. Scrolling the browser window does not cause the tour step to reload.
+
+							IMPORTANT: orphan steps are stuck to the center of the screen. However steps linked to elements ALWAYS stay stuck to their element, even if user scrolls the element & tour popover
+							off the screen. This is my personal preference, as original functionality of tour step moving with the scroll even when the element was off the viewport seemed strange.
+						</td>
+					</tr>
+					<tr>
+						<td>Customizable progress bar & progress text</td>
+						<td>
+							Options showProgressBar and showProgressText added globally and per step, to automatically show progress through the tour. The appearance can
+							be overridden by providing functions for the getProgressBarHTML and getProgressTextHTML options.
+						</td>
+					</tr>
+					<tr>
+						<td>Prevent interaction with element</td>
+						<td>
+							Sometimes you want to highlight a DOM element (button, input field) for a tour step, but don't want the user to be able to interact with it.
+							Use the preventInteraction option to stop the user touching the element:
+						</td>
+					</tr>
+					<tr>
+						<td>Wait for an element to appear before continuing tour</td>
+						<td>
+							Sometimes a tour step element might not be immediately ready because of transition effects etc. This is a specific issue with bootstrap select, which is relatively slow to show the selectpicker
+							dropdown after clicking.
+							Use delayOnElement to instruct Tour to wait for **ANY** element to appear before showing the step (or crapping out due to missing element). Yes this means the tour step element can be one DOM
+							element, but the delay will wait for a completely separate DOM element to appear. This is really useful for hidden divs etc.
+							Use in conjunction with onElementUnavailable for robust tour step handling.
+						</td>
+					</tr>
+					<tr>
+						<td>Callback trigger when modal closes</td>
+						<td>
+							If tour element is a modal, or is a DOM element inside a modal, the element can disappear "at random" if the user dismisses the dialog.
+							In this case, onModalHidden global and per step function is called. Only functional when step is not an orphan.
+							This is useful if a tour includes a step that launches a modal, and the tour requires the user to take some actions inside the modal before OK'ing it and moving to the next
+							tour step.
+						</td>
+					</tr>
+					<tr>
+						<td>Handle Dialogs and BootstrapDialog plugin better</td>
+						<td>
+							Bootstrap Dialog (https://nakupanda.github.io/bootstrap3-dialog/) plugin makes creating dialogs very easy, but it does some extra stuff to the dialogs and dynamically creates/destroys them. This
+							causes issues with plugins that want to include a modal dialog in the steps using this plugin.
+						</td>
+					</tr>
+					<tr>
+						<td>Fix conflict with Bootstrap Selectpicker</td>
+						<td>
+							Selectpicker (https://github.com/snapappointments/bootstrap-select/) draws a custom select. Tour now automagically finds and adjusts the selectpicker dropdown so that it appears correctly within the tour
+						</td>
+					</tr>
+					<tr>
+						<td>Call onPreviouslyEnded if tour.start() is called for a tour that has previously ended</td>
+						<td>
+							See the following github issue: https://github.com/sorich87/bootstrap-tour/issues/720
+									Original behavior for a tour that had previously ended was to call onStart() callback, and then abort without calling onEnd(). This has been altered so
+									that calling start() on a tour that has previously ended (cookie step set to end etc) will now ONLY call onPreviouslyEnded().
+
+									This restores the functionality that allows app JS to simply call tour.start() on page load, and the Tour will now only call onStart() / onEnd() when
+									the tour really is started or ended.
+						</td>
+					</tr>
+					<tr>
+						<td>Switch between Bootstrap 3 or 4 and use custom templates</td>
+						<td>
+							Tour is compatible with bootstrap 3 and 4 if the right template and framework is used for the popover. Bootstrap3 framework compatibility is used by default.
+						</td>
+					</tr>
+					<tr>
+						<td>Bootstrap Sanitizer fixed</td>
+						<td>
+							BS 3.4.1 and BS4.x added a sanitizer to popover and tooltips - this breaking change strips non-whitelisted DOM elements from popover content, title etc.
+							See: https://getbootstrap.com/docs/3.4/javascript/#js-sanitizer and https://blog.getbootstrap.com/2019/02/13/bootstrap-4-3-1-and-3-4-1/.
+							This Bootstrap change resulted in Tour navigation buttons being killed from the DOM: https://github.com/sorich87/bootstrap-tour/issues/723#issuecomment-471107788
+						</td>
+					</tr>
+					<tr>
+						<td>Localization</td>
+						<td>
+							You can now change the text displayed for the buttons used in the tour step popups
+						</td>
+					</tr>
+					<tr>
+						<td>Show unintended orphan steps</td>
+						<td>
+							If a tour step specifies an element, and the element doesn't exist, showIfUnintendedOrphan will show the tour step as an orphan. This ensures
+							your tour step will always be shown.
+						</td>
+					</tr>
+					<tr>
+						<td>Overlay divs and customizable transitions between tour steps</td>
+						<td>
+							Tourist now uses overlays to highlight tour step elements. A single backdrop div provides the dark/black background, and a highlight div is used
+							to highlight the element of a tour step. Each tour step element is then adjusted by zindex to pop to the top. This enables fancy transitions
+							between steps, and further advanced features.
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
+		</div>
+	</section>
+
+
+		<hr>
+
+    <section id="globaloptions">
+  <div class="container">
+    <div class="page-header">
+      <h2>Options</h2>
+    </div>
+    <h3 id="tour-options">Global options</h3>
+	<figure class="highlight">
+		<pre>
+			<code class="language-javascript" data-lang="javascript">
+<span class="kd">var</span> <span class="nx">tour</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Tour</span><span class="p">({</span>
+	<span class="na">name</span><span class="p">:</span> <span class="s2">"tour"</span><span class="p">,</span>
+	<span class="na">steps</span><span class="p">:</span> <span class="p">[],</span>
+	<span class="na">container</span><span class="p">:</span> <span class="s2">"body"</span><span class="p">,</span>
+	<span class="na">autoscroll</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+	<span class="na">keyboard</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+	<span class="na">storage</span><span class="p">:</span> <span class="nb">window</span><span class="p">.</span><span class="nx">localStorage</span><span class="p">,</span>
+	<span class="na">debug</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+	<span class="na">backdrop</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+	<span class="na">backdropContainer</span><span class="p">:</span> <span class="s1">'body'</span><span class="p">,</span>
+	<span class="na">backdropOptions</span><span class="p">:</span> <span class="p">{
+		<span class="tab80"><span class="p">highlightOpacity: 0.9,</span></span>
+		<span class="tab80"><span class="p">highlightColor: #FFF,</span></span>
+		<span class="tab80">
+			<span class="p">animation: {</span>
+				<span class="tab40"><span class="p">backdropShow: </span> <span class="p">"CSS_classname" </span> -or- <span class="kd">function</span> <span class="p">(</span><span class="nx">domElement</span><span class="p">,</span> <span class="nx">step</span><span class="p">)</span> <span class="p">{},</span>
+				<span class="tab40"><span class="p">backdropHide: </span> <span class="p">"CSS_classname" </span> -or- <span class="kd">function</span> <span class="p">(</span><span class="nx">domElement</span><span class="p">,</span> <span class="nx">step</span><span class="p">)</span> <span class="p">{},</span>
+				<span class="tab40"><span class="p">highlightShow: </span> <span class="p">"CSS_classname" </span> -or- <span class="kd">function</span> <span class="p">(</span><span class="nx">domElement</span><span class="p">,</span> <span class="nx">step</span><span class="p">)</span> <span class="p">{},</span>
+				<span class="tab40"><span class="p">highlightTransition: </span> <span class="p">"CSS_classname" </span> -or- <span class="kd">function</span> <span class="p">(</span><span class="nx">domElement</span><span class="p">,</span> <span class="nx">step</span><span class="p">)</span> <span class="p">{},</span>
+				<span class="tab40"><span class="p">highlightHide: </span> <span class="p">"CSS_classname" </span> -or- <span class="kd">function</span> <span class="p">(</span><span class="nx">domElement</span><span class="p">,</span> <span class="nx">step</span><span class="p">)</span> <span class="p">{},</span>
+			},</span>
+		},</span>
+	<span class="na">redirect</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+	<span class="na">orphan</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+	<span class="na">showIfUnintendedOrphan</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+	<span class="na">duration</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+	<span class="na">delay</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+	<span class="na">basePath</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+	<span class="na">template</span><span class="p">:</span> <span class="s2"><i>...see documentation...</i></span><span class="p">,</span>
+	<span class="na">localization</span><span class="p">:</span> <span class="p">{
+		<span class="tab80">
+			<span class="p">buttonTexts: {</span>
+				<span class="tab40"><span class="p">prevButton: </span> <span class="p">"Prev",</span>
+				<span class="tab40"><span class="p">nextButton: </span> <span class="p">"Next",</span>
+				<span class="tab40"><span class="p">pauseButton: </span> <span class="p">"Pause",</span>
+				<span class="tab40"><span class="p">resumeButton: </span> <span class="p">"Resume",</span>
+				<span class="tab40"><span class="p">endTourButton: </span> <span class="p">"End Tour",</span>
+			},</span>
+		},</span>
+	<span class="na">framework</span><span class="p">:</span> <span class="s2">"bootstrap3"</span><span class="p">,</span>
+	<span class="na">sanitizeWhitelist</span><span class="p">:</span> <span class="p">[],</span>
+	<span class="na">sanitizeFunction</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">cleanMe</span><span class="p">)</span> <span class="p">{},</span>
+	<span class="na">showProgressBar</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+	<span class="na">showProgressText</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+	<span class="na">getProgressBarHTML</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">percent</span><span class="p">)</span> <span class="p">{},</span>
+	<span class="na">getProgressTextHTML</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">stepNumber, percent, stepCount</span><span class="p">)</span> <span class="p">{},</span>
+	<span class="na">afterGetState</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{},</span>
+	<span class="na">afterSetState</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{},</span>
+	<span class="na">afterRemoveState</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{},</span>
+	<span class="na">onStart</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">)</span> <span class="p">{},</span>
+	<span class="na">onEnd</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">)</span> <span class="p">{},</span>
+	<span class="na">onShow</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">)</span> <span class="p">{},</span>
+	<span class="na">onShown</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">)</span> <span class="p">{},</span>
+	<span class="na">onHide</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">)</span> <span class="p">{},</span>
+	<span class="na">onHidden</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">)</span> <span class="p">{},</span>
+	<span class="na">onNext</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">)</span> <span class="p">{},</span>
+	<span class="na">onPrev</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">)</span> <span class="p">{},</span>
+	<span class="na">onPause</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">,</span> <span class="nx">duration</span><span class="p">)</span> <span class="p">{},</span>
+	<span class="na">onResume</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">,</span> <span class="nx">duration</span><span class="p">)</span> <span class="p">{},</span>
+	<span class="na">onRedirectError</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">)</span> <span class="p">{}</span>
+	<span class="na">onElementUnavailable</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour, stepNumber</span><span class="p">)</span> <span class="p">{},</span>
+	<span class="na">onPreviouslyEnded</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">)</span> <span class="p">{},</span>
+	<span class="na">onModalHidden</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour, stepNumber</span><span class="p">)</span> <span class="p">{},</span>
+<span class="p">});</span>
+			</code>
+		</pre>
+	</figure>
+
+
+	<p class="top-buffer">
+		A <span class="label label-info"><b>*</b></span> in the first column of this table identifies features and options that have been added, or have been materially changed, compared to original Tour. If you
+		never used Bootstrap Tour and upgraded to Tourist, you can ignore this column.
+	</p>
+    <table class="table table-bordered table-striped">
+		<thead>
+			<tr>
+				<th width="1%"></th>
+				<th width="10%">Name</th>
+				<th width="4%">Type</th>
+				<th width="40%">Description</th>
+				<th width="45%">Default</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td></td>
+				<td>name</td>
+				<td>String</td>
+				<td>This option is used to build the name of the storage item where the tour state is stored.
+					The name should contain only alphanumerics, underscores and hyphens.
+					You can initialize several tours with different names in the same page and application.</td>
+				<td><code>'tour'</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>steps</td>
+				<td>Array</td>
+				<td>A list of object representing the steps to be included in the tour. Jump to
+					<a href="http://bootstraptour.com/api/#step-options">Step options</a> for the single step API.</td>
+				<td><code>[]</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>container</td>
+				<td>String</td>
+				<td>Appends the step popover to a specific element.<br>
+					<em>See Usage section of
+						<a href="https://getbootstrap.com/javascript/#popovers" target="_blank">Popover</a>.
+					</em>
+				</td>
+				<td><code>'body'</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>autoscroll</td>
+				<td>Boolean</td>
+				<td>Autoscrolls the window when the step popover is out of view.</td>
+				<td><code>true</code></td>
+			</tr>
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>keyboard</td>
+				<td>Boolean</td>
+				<td>This option enables keyboard navigation through the tour using left and right arrow keys, and escape to end</td>
+				<td><code>true</code></td>
+			</tr>
+			<tr id="storage">
+				<td></td>
+				<td>storage</td>
+				<td>Object</td>
+				<td>The storage system you want to use. Could be the objects window.localStorage,
+					window.sessionStorage or your own object.<br>
+					You can set this option as
+					<code>false</code> to disable storage
+					persistence (the tour starts from beginning every time the page is
+					loaded).<br>
+					<em>Read more about <a href="https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Storage" target="_blank">DOM Storage interfaces</a>.</em>
+				</td>
+				<td><code>window.localStorage</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>debug</td>
+				<td>Boolean</td>
+				<td>Set this option to true to have some useful information printed in the
+					console. This will help you find problems in your tour, and report bugs in the github repo.</td>
+				<td><code>false</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>backdrop</td>
+				<td>Boolean</td>
+				<td>Show a dark backdrop behind the popover and its element, highlighting the current step.</td>
+				<td><code>false</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>backdropContainer </td>
+				<td>String (jQuery selector)</td>
+				<td>HTML element on which the backdrop should be shown.</td>
+				<td><code>'body'</code></td>
+			</tr>
+			<tr class="success">
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>backdropOptions <span class="label label-success">NEW v0.3.0</span></td>
+				<td>Object</td>
+				<td>
+					<p>
+						Tourist now uses overlays to highlight tour step elements. A single backdrop div provides the dark/black background, and a highlight div is used
+						to highlight the element of a tour step. Each tour step element is then adjusted by zindex to pop to the top. This approach allows highly customizable
+						backdrops, transitions and appearances.
+					</p>
+					<p>
+						Specify an object to use this option. The available options via object properties are shown next. You only need to specify the options you want to change,
+						the rest will be left as default.
+					</p>
+				</td>
+				<td><code>
+						backdropOptions:	{<br>
+						<div class="tab40">highlightOpacity:	0.8,<br>
+							highlightColor:		#FFF,<br>
+							animation:	{}<br>
+						</div>}<br>
+					</code>
+				</td>
+			</tr>
+
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td><span class="tab40"<i>backdropOptions.</i>highlightOpacity</span></td>
+				<td>Float</td>
+				<td>The alpha / opacity value for the highlight element - the div that floats on top of a tour step's element to visually identify it</td>
+				<td><code>0.8</code></td>
+			</tr>
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td><span class="tab40"<i>backdropOptions.</i>highlightColor</span></td>
+				<td>Hex value</td>
+				<td>The RGB hex value of the highlight. Normally, this will be white / #FFF. However if your step element has a black or dark backgroup then you may
+					wish to set this to #000 or some other color.</td>
+				<td><code>#FFF</code></td>
+			</tr>
+
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td><span class="tab40"<i>backdropOptions.</i>animation</span></td>
+				<td>Object</td>
+				<td>
+					<p>
+						Tourist offers a powerful set of features to manipulate and animate the transition between tour steps. This option can be complex to use,
+						so please refer to the specific Advanced Features - Step Transitions section.
+					</p>
+					<p>
+						The following options are available. Provide either a string of a CSS class name, or a function with signature
+						<code>function(domElement, step) {}</code>.
+					</p>
+					<p>
+						The "backdrop" is the usually dark background overlay that sits across the entire page, visible
+						when the option <code>backdrop === true</code>. The "highlight" is the square overlay on a step's element, making that element visually pop
+						out of the page.
+					</p>
+					<ul>
+						<li><code>backdropShow:</code> - when a previously hidden backdrop is made visible, such as on tour start or when moving between steps that use the <code>backdrop</code> option</li>
+						<li><code>backdropHide:</code> - when a previously visible backdrop is hidden</li>
+						<li><code>highlightShow:</code> - when showing the highlight, such as when moving from an orphan step to an element step</li>
+						<li><code>highlightTransition:</code> - when moving the position of the highlight between two elements, normally when moving between tour steps</li>
+						<li><code>highlightHide:</code> - when hiding the highlight</li>
+					</ul>
+
+					<p>
+						If a CSS class name (as a string literal) is provided, this class will be applied to the specified element at the specified time and removed afterwards. You can use this
+						class to add transition effects. This is shown in the <code>highlightTransition</code> to the right.
+					</p>
+					<p>
+						If you provide a function, your code is 100% responsible for positioning and showing the highlight overlay element.
+						It's more hassle - why would you want to do this? Simply, Tourist can only provide a fairly standard/default set of transitions, especially where
+						the highlightTransition option is concerned. If you want your tour to have an especially fancy or featured/custom transition, you can use this option
+						to achieve that. You can also work with rotated or transformed elements using this feature.
+						Most of the time you will not need to use this option, and specifying a CSS class will be sufficient. But the option is here if you need it.
+						<br>
+						Implementing this can be complex, please refer to the Advanced Topics section.
+					</p>
+				</td>
+				<td>
+					<code>
+						{<br>
+							<span class="tab40">backdropShow:			function(domElement, step)</span><br>
+							<span class="tab40">{</span><br>
+							<span class="tab80">domElement.fadeIn();</span><br>
+							<span class="tab40">},</span><br>
+							<span class="tab40">backdropHide:			function(domElement, step),</span><br>
+							<span class="tab40">{</span><br>
+							<span class="tab80">domElement.fadeOut("slow");</span><br>
+							<span class="tab40">},</span><br>
+							<span class="tab40">highlightShow:			function(domElement, step)</span><br>
+							<span class="tab40">{</span><br>
+							<span class="tab80">domElement.fadeIn();</span><br>
+							<span class="tab80">step.fnPositionHighlight();</span><br>
+							<span class="tab40">},</span><br>
+							<span class="tab40">highlightTransition:	"tour-highlight-animation",</span><br>
+							<span class="tab40">highlightHide:			function(domElement, step)</span><br>
+							<span class="tab40">{</span><br>
+							<span class="tab80">domElement.fadeOut("slow");</span><br>
+							<span class="tab40">},</span><br>
+						}
+					</code>
+				</td>
+			</tr>
+
+
+			<tr>
+				<td></td>
+				<td>redirect</td>
+				<td>Boolean|Function</td>
+				<td>Set a custom function to execute as redirect function. All other step options will be ignored, and when this step is loaded, the
+					redirect will be immediately executed.
+					The default redirect relies on the traditional <code class="language-javascript">document.location.href</code></td>
+				<td><code>true</code></td>
+			</tr>
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>orphan</td>
+				<td>Boolean</td>
+				<td>
+					"Intended orphans" are steps that are not linked to elements. This global option forcibly sets all tour steps to intended orphans, showing them in the middle
+					of the browser window in a fixed position and unlinked to elements. Unless you have a specific requirement to use this, you will normally set
+					the orphan option on a per-step basis using the step options.
+					<br><br>
+					For Tour -> Tourist upgraders: the behavior of this global option differs from original Tour. In original Tour, this option controlled whether steps are
+					shown if their element is missing. In Tourist, that functionality has been moved to <code>showIfUnintendedOrphan</code>. This creates consistency in
+					option naming and action.
+				</td>
+				<td><code>false</code></td>
+			</tr>
+
+			<tr class="success">
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>showIfUnintendedOrphan <span class="label label-success">NEW v0.3.0</span></td>
+				<td>Boolean</td>
+				<td>
+					<p>
+						"Intended orphans" are steps that are deliberately not linked to elements (see step option <code>orphan</code>).
+						<br><br>
+						"Unintended orphans" are steps that are linked to elements (steps that have the
+						<code>element:</code> option correctly specified, and do not specify <code>orphan: true</code>), but where the element is unavailable.
+						<br><br>
+						An element can be unavailable for several reasons: the wrong DOM ID due to an error in the tour code, the element is not currently visible,
+						custom code has not yet added the element to the DOM. Remember that until <code>$element.visible() === true</code>, the element is considered
+						unavailable.
+						<br><br>
+						When this option is <code>true</code>, Tourist will always show a tour step even if its element is unavailable.
+						<br><br>
+						Use of this option overrides the error handling global and per step option <code>onElementUnavailable</code>
+					</p>
+				</td>
+				<td><code>
+						false
+					</code>
+				</td>
+			</tr>
+
+
+
+			<tr>
+				<td></td>
+				<td>duration</td>
+				<td>Boolean|Number</td>
+				<td>Set a expiration time for the steps. When the current step expires,
+					the next step is automatically shown. See it as a sort of guided, automatized tour
+					functionality. The value is specified in milliseconds</td>
+				<td><code>false</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>delay</td>
+				<td>Boolean|Number</td>
+				<td>Specifies a delay for the showing and hiding the tour steps.
+					It can be:
+					<ul>
+						<li>a falsy - there is no delay</li>
+						<li>a number - used as a delay for both showing and hiding. In milliseconds</li>
+						<li>a object containing optional <code>show</code> and <code>hide</code> numbers - defines the delays for showing and hiding respectively</li>
+					</ul>
+				</td><td><code>0</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>basePath</td>
+				<td>String</td>
+				<td>Specify a default base path prepended to the
+					<code>path</code> option of every single
+					step. Very useful if you need to reuse the same tour on different
+					environments or sub-projects.</td>
+				<td><code>''</code></td>
+			</tr>
+
+
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>framework</td>
+				<td>String</td>
+				<td>
+					<p>
+						Tourist supports Bootstrap3 (default) and Bootstrap4. These frameworks require different templates and code to create popovers,
+						so simply specify the framework you're using: <code>bootstrap3</code> or <code>bootstrap4</code>.
+					</p>
+				</td>
+				<td><code>
+						"bootstrap3"
+					</code>
+				</td>
+			</tr>
+
+			<tr>
+				<td></td>
+				<td>template</td>
+				<td>String|Function</td>
+				<td>String or function that returns a string of the HTML template for
+					the popovers. If you pass a Function, two parameters are available:
+					<strong>i</strong> is the position of step in the tour and
+					<strong>step</strong> is the an object that contains all the other step
+					options.
+					<br><br>
+					Default templates for Bootstrap 3 and Bootstrap 4 are included. The global option <code>framework</code> instructs Tourist on which
+					framework you are using, and therefore what template to select (as well as other runtime aspects of managing popovers). If required,
+					you can search the source code for <code>SEARCH PLACEHOLDER: TEMPLATES LOCATION</code> for the default templates, and add your own.
+					<br><br>
+					When creating a template, Tourist maps the <em>previous</em>, <em>next</em>, <em>pause-resume</em> and <em>end</em> logics to the elements
+					which have the related <code class="language-markup">data-role</code> attribute.
+					Therefore, you can also have multiple elements with the same <code class="language-markup">data-role</code> attribute.
+				</td>
+				<td>
+					<code>template selected based on framework in use
+					</code>
+				</td>
+			</tr>
+
+
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>localization</td>
+				<td>Object</td>
+				<td>
+					<p>
+						When using the default templates (i.e.: <code>template</code> option not specified), a set of default texts is used for the tour navigation
+						buttons. You may change and localize the button texts with this option. If you specify a custom template, this option has no effect as the
+						expectation is that you'll manage your own localization. Specify one or more keys as shown in the example - any keys not specified will retain
+						their defaults.
+					</p>
+				</td>
+				<td><code>
+						{<br>
+							<span class="tab40">prevButton: "Prev",</span><br>
+							<span class="tab40">nextButton: "Next",</span><br>
+							<span class="tab40">pauseButton: "Pause",</span><br>
+							<span class="tab40">resumeButton: "Resume",</span><br>
+							<span class="tab40">endTourButton: "End Tour"</span><br>
+						}
+					</code>
+				</td>
+			</tr>
+
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>sanitizeWhitelist</td>
+				<td>Object</td>
+				<td>
+					<p>
+						BS 3.4.1 and 4.3.x added an HTML sanitizer to popover and tooltips. This breaking change strips non-whitelisted DOM elements from popover
+						content, title etc. This is the main cause of elements vanishing from popover content. For more information, read about the
+						<a href='https://getbootstrap.com/docs/3.4/javascript/#js-sanitizer'>Bootstrap Sanitizer</a> and
+						<a href='https://blog.getbootstrap.com/2019/02/13/bootstrap-4-3-1-and-3-4-1/'>Bootstrap 4.3 and 3.4 change</a>
+					</p>
+					<p>
+						<b>
+							This is a security feature, so please review carefully. If you do not understand the purpose of the sanitizer, why it exists in
+							bootstrap or how it relates to Tourist, do not use this option and leave it as default.
+						</b>
+					</p>
+					<p>
+						To use this option, specify an object that will be merged with the Bootstrap Popover default whitelist. Use the same structure as the default Bootstrap
+						whitelist. For example:
+					</p>
+					<code>
+						// Allow tour step content to include a button with attributes data-someplugin1="..." and data-somethingelse="...". Allow content to include a selectpicker.<br>
+						var Tour=new Tour({<br>
+											<span class="tab40">sanitizeWhitelist:	{</span><br>
+																	<span class="tab40">"button"	: ["data-someplugin1", "data-somethingelse"], // allows &lt;button data-someplugin1="abc", data-somethingelse="xyz"&rt;</span><br>
+																	<span class="tab40">"select"	: [] // allows &lt;select&rt;</span><br>
+																<span class="tab40">}
+										});
+
+					</code>
+
+
+				</td>
+				<td><code>
+						{}
+					</code>
+				</td>
+			</tr>
+
+
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>sanitizeFunction</td>
+				<td>Function</td>
+				<td>
+					<p>
+						BS 3.4.1 and 4.3.x added an HTML sanitizer to popover and tooltips. Review the description for Tourist option <code>sanitizeWhitelist</code> before
+						continuing.
+					</p>
+					<p>
+						<b>
+							This is a security feature, so please review carefully. If you do not understand the purpose of the sanitizer, why it exists in
+							bootstrap or how it relates to Tourist, do not use this option and leave it as default.
+						</b>
+					</p>
+					<p>
+						Specify a function that will be used to sanitize each tour step's content at runtime. The function must have the following signature:
+						<code>string function(uncleanContent)</code>. This function will be called for each step, and will be passed the step's content. It is this
+						function's responsibility to properly and safely clean the content and return it as a string.
+					</p>
+					<p>
+						Specifying a function for this option will cause sanitizeWhitelist to be ignored.
+						Specifying anything other than a function for this option will be ignored, and sanitizeWhitelist will be used.
+					</p>
+					<code>
+						// Allow tour step content to include a button with attributes data-someplugin1="..." and data-somethingelse="...". Allow content to include a selectpicker.<br>
+						var Tour=new Tour({<br>
+											<span class="tab40">sanitizeFunction:	function(stepContent)	{</span><br>
+																	<span class="tab80">// Bypass Bootstrap sanitizer using custom function to clean the tour step content.</span><br>
+																	<span class="tab80">// stepContent will contain the content of the step, i.e.: tourSteps[n].content. You must</span><br>
+																	<span class="tab80">// clean this content to prevent XSS and other vulnerabilities</span><br>
+																	<span class="tab80">return DOMPurify.sanitize(stepContent);</span><br>
+																<span class="tab40">}
+										});
+
+					</code>
+				</td>
+				<td><code>
+						null
+					</code>
+				</td>
+			</tr>
+
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>showProgressBar</td>
+				<td>Boolean</td>
+				<td>
+					<p>
+						Shows a progress bar at the top of each tour step. This option can be overridden per step.
+					</p>
+				</td>
+				<td><code>
+						true
+					</code>
+				</td>
+			</tr>
+
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>showProgressText</td>
+				<td>Boolean</td>
+				<td>
+					<p>
+						Shows a text representation of progress in the title of each tour step. Appears as "X/N", i.e.: "1/24". This option can be overridden per step.
+					</p>
+				</td>
+				<td><code>
+						true
+					</code>
+				</td>
+			</tr>
+
+
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>getProgressBarHTML</td>
+				<td>Function</td>
+				<td>
+					<p>
+						When <code>showProgressBar == true</code>, specifying a function allows you to customize the appearance of the progress bar. The function
+						signature is <code>string function(percent)</code>. The <code>percent</code> option is the current percentage of progress through the tour.
+						Use this to calculate your progress bar, and return a string of a "drawn" progress bar.
+					</p>
+					<figure class="highlight">
+							<code>
+						var Tour=new Tour({<br>
+						<span class="tab40">getProgressBarHTML:	function(percent)</span><br>
+											<span class="tab40">		{</span><br>
+											<span class="tab80">			// override the global progress bar function</span><br>
+											<span class="tab80">			return '&lt;div class=&quot;progress&quot;&gt;&lt;div class=&quot;progress-bar progress-bar-striped&quot; role=&quot;progressbar&quot; style=&quot;width: ' + percent + '%;&quot;&gt;&lt;/div&gt;&lt;/div&gt;';</span><br>
+											<span class="tab40">		}</span><br>
+										});<br>
+
+							</code>
+					</figure>
+				</td>
+				<td><code>
+						function(percent){}
+					</code>
+				</td>
+			</tr>
+
+
+
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>getProgressTextHTML</td>
+				<td>Function</td>
+				<td>
+					<p>
+						When <code>showProgressText == true</code>, specifying a function allows you to customize the appearance of the progress text. The function
+						signature is <code>string function(stepNumber, percent, stepCount)</code>.
+					</p>
+					<ul>
+						<li><code>stepNumber</code> is the current step in the tour.</li>
+						<li><code>percent</code> is the current percentage of progress through the tour.</li>
+						<li><code>stepCount</code> is the total number of steps currently in the tour.</li>
+					</ul>
+					<figure class="highlight">
+							<code>
+						var Tour=new Tour({<br>
+						<span class="tab40">getProgressBarText:	function(stepNumber, percent, stepCount)</span><br>
+											<span class="tab40">		{</span><br>
+											<span class="tab80">			// override the global progress bar function</span><br>
+											<span class="tab80">			return return 'Slide ' + stepNumber + '/' + stepCount;</span><br>
+											<span class="tab40">		}</span><br>
+										});<br>
+
+							</code>
+					</figure>
+				</td>
+				<td><code>
+						function(stepNumber, percent, stepCount){}
+					</code>
+				</td>
+			</tr>
+
+
+
+			<tr>
+				<td></td>
+				<td>afterGetState, afterSetState, afterRemoveState</td>
+				<td>Function</td>
+				<td>You may want to do something right after Bootstrap Tour read, write or remove
+					the state. Just pass functions to these.<br>
+					Your functions can have two parameters:
+					<ul class="unstyled">
+						<li>
+							<strong>key</strong>
+							Contains the name of the state being saved. It can be
+							<code>current_step</code> (for the state where the
+							latest step the visitor viewed is saved) or
+							<code>end</code> (for the state which is saved when
+							the user complete the tour). Note that Bootstrap Tour prepends the key with
+							<code>tour_</code> when saving the state.
+						</li>
+						<li>
+							<strong>value</strong>
+							The value of the state been saved. Can be the index of the
+							current step if the key is <code>current_step</code>, or
+							<code>yes</code> if the key is <code>end</code>.
+						</li>
+					</ul>
+					<p>A simple example if to send a post request to your server each
+						time there is a change:</p>
+					<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">tour</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Tour</span><span class="p">({</span>
+  <span class="na">afterSetState</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">$</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="s2">"/some/path"</span><span class="p">,</span> <span class="nx">value</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">});</span></code></pre></figure>
+				</td>
+				<td><code>function (key, value) { }</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>onStart</td>
+				<td>Function</td>
+				<td>Function to execute when the tour starts.</td>
+				<td><code>function (tour) { }</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>onEnd</td>
+				<td>Function</td>
+				<td>Function to execute when the tour ends.</td>
+				<td><code>function (tour) { }</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>onShow</td>
+				<td>Function</td>
+				<td>Function to execute right before each step is shown.</td>
+				<td><code>function (tour) { }</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>onShown</td>
+				<td>Function</td>
+				<td>Function to execute right after each step is shown.</td>
+				<td><code>function (tour) { }</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>onHide</td>
+				<td>Function</td>
+				<td>Function to execute right before each step is hidden.</td>
+				<td><code>function (tour) { }</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>onHidden</td>
+				<td>Function</td>
+				<td>Function to execute right after each step is hidden.</td>
+				<td><code>function (tour) { }</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>onNext</td>
+				<td>Function</td>
+				<td>Function to execute when next step is called.</td>
+				<td><code>function (tour) { }</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>onPrev</td>
+				<td>Function</td>
+				<td>Function to execute when prev step is called.</td>
+				<td><code>function (tour) { }</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>onPause</td>
+				<td>Function</td>
+				<td>Function to execute when pause is called. The second argument refers to the
+					remaining duration.</td>
+				<td><code>function (tour, duration) { }</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>onResume</td>
+				<td>Function</td>
+				<td>Function to execute when resume is called. The second argument refers to the
+					remaining duration.</td>
+				<td><code>function (tour, duration) { }</code></td>
+			</tr>
+
+			<tr>
+				<td></td>
+				<td>onRedirectError</td>
+				<td>Function</td>
+				<td>Function to execute when there is a redirection error. This
+					happens when bootstrap tour cannot redirect to the path of the step</td>
+				<td><code>function (tour) { }</code></td>
+			</tr>
+
+
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>onElementUnavailable</td>
+				<td>Function</td>
+				<td>
+					Function to execute when a step element is unavailable (<code>$element.visible() !== true</code>). Use this to create a global error handler for your
+					tour.
+				</td>
+				<td><code>function (tour, stepNumber) { }</code></td>
+			</tr>
+
+
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>onPreviouslyEnded</td>
+				<td>Function</td>
+				<td>
+					<p>
+						Function to execute when <code>tour.start()</code> is called for a tour that has previously ended. The tour will not be restarted, and this
+						function will be called to notify your code. This function will never get called if a tour is started with <code>tour.restart()</code>.
+					</p>
+					<p>
+						A tour is marked as "ended" in localstorage when the user either clicks the end button, or the tour naturally reaches the end.
+					</p>
+				</td>
+				<td><code>function (tour) { }</code></td>
+			</tr>
+
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>onModalHidden</td>
+				<td>Function</td>
+				<td>
+					<p>
+						If tour element is a modal, or is a DOM element inside a modal, the element can disappear "at random" if the user dismisses the dialog.
+						In this case, onModalHidden is called. This is useful if a tour includes a step that launches a modal, and the tour requires the user to
+						take some actions inside the modal before OK'ing it and moving to the next tour step. This option is available globally and per-step, so use
+						this as a global handler and override per step as required.
+					</p>
+					<ul>
+						<li>Return (int) step number to immediately move to that step</li>
+						<li>Return exactly false to not change tour state in any way - this is useful if you need to reshow the modal because some validation failed</li>
+						<li>Return anything else to move to the next step</li>
+					</ul>
+					<p>
+						Element === Bootstrap modal, or element parent === bootstrap modal is automatically detected.
+					</p>
+				</td>
+				<td><code>function (tour, stepNumber) { }</code></td>
+			</tr>
+
+
+
+		</tbody>
+    </table>
+
+	<hr>
+
+    <a id="stepoptions"></a>
+    <h3>Step Options</h3>
+	<p>
+		Where a per-step option is named the same as a global option, the per-step option overrides and takes precedence.
+	</p>
+
+
+	<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">var tourSteps = </span><span class="p">[{</span>
+  <span class="na">path</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+  <span class="na">host</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+  <span class="na">element</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+  <span class="na">placement</span><span class="p">:</span> <span class="s2">"right"</span><span class="p">,</span>
+  <span class="na">title</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+  <span class="na">content</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+  <span class="na">animation</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+  <span class="na">container</span><span class="p">:</span> <span class="s2">"body"</span><span class="p">,</span>
+  <span class="na">backdrop</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+  <span class="na">backdropOptions</span><span class="p">:</span> <span class="s1">{}</span><span class="p">,</span>
+  <span class="na">redirect</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+  <span class="na">reflex</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+  <span class="na">reflexOnly</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+  <span class="na">preventInteraction</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+  <span class="na">orphan</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+  <span class="na">showIfUnintendedOrphan</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+  <span class="na">template</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+  <span class="na">delay</span><span class="p">:</span> <span class="kc"></span><span class="p">,</span>
+  <span class="na">delayOnElement</span><span class="p">:</span> <span class="kc">{}</span><span class="p">,</span>
+<span class="na">showProgressBar</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+<span class="na">showProgressText</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+<span class="na">getProgressBarHTML</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">percent</span><span class="p">)</span> <span class="p">{},</span>
+<span class="na">getProgressTextHTML</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">stepNumber, percent, stepCount</span><span class="p">)</span> <span class="p">{},</span>
+  <span class="na">onShow</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">)</span> <span class="p">{},</span>
+  <span class="na">onShown</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">)</span> <span class="p">{},</span>
+  <span class="na">onHide</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">)</span> <span class="p">{},</span>
+  <span class="na">onHidden</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">)</span> <span class="p">{},</span>
+  <span class="na">onNext</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">)</span> <span class="p">{},</span>
+  <span class="na">onPrev</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">)</span> <span class="p">{},</span>
+  <span class="na">onPause</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">)</span> <span class="p">{},</span>
+  <span class="na">onResume</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">)</span> <span class="p">{},</span>
+  <span class="na">onRedirectError</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tour</span><span class="p">)</span> <span class="p">{}</span>
+<span class="p">}];<br><br><span class="nx">var tour = new Tour({<br>steps: tourSteps<br>});</span></span></code></pre></figure>
+
+	<p class="top-buffer">
+		A <span class="label label-info"><b>*</b></span> in the first column of this table identifies features and options that have been added, or have been materially changed, compared to original Tour. If you
+		never used Bootstrap Tour and upgraded to Tourist, you can ignore this column.
+	</p>
+
+
+    <table class="table  table-bordered table-striped">
+		<thead>
+			<tr>
+				<th width="1%"></th>
+				<th width="10%">Name</th>
+				<th width="4%">Type</th>
+				<th width="40%">Description</th>
+				<th width="45%">Default</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td></td>
+				<td>path</td>
+				<td>String or RegExp</td>
+				<td>Path to the page on which the step should be shown. This
+					allows you to build tours that span several pages!</td>
+				<td><code>''</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>host</td>
+				<td>String or RegExp</td>
+				<td>Host of the page on which the step should be shown. This
+					allows you to build tours for several sub-domains</td>
+				<td><code>''</code></td>
+			</tr>
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>element</td>
+				<td>String (jQuery selector) or Function</td>
+				<td>
+					HTML element on which the step popover should be shown. Specify either a DOM ID, or a function. The function must return a single jquery object,
+					for example:<br>
+					<code>element: function() { return $(document).find('#myButton'); }</code>
+					<br><br>
+					If the global or step option <code>orphan === true</code>, this option is ignored and the step will always appear as an intended orphan.
+				</td>
+				<td><code>''</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>placement</td>
+				<td>String|Function</td>
+				<td>How to position the popover. Possible choices:
+					<code>'top'</code>,
+					<code>'bottom'</code>,
+					<code>'left'</code>,
+					<code>'right'</code>,
+					<code>'auto'</code>.
+					When "auto" is specified, it will dynamically reorient the popover.
+					For example, if placement is "auto left", the popover will display to
+					the left when possible, otherwise it will display right.
+				</td>
+				<td><code>'auto'</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>title</td>
+				<td>String|Function</td>
+				<td>Step title</td>
+				<td><code>''</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>content</td>
+				<td>String|Function</td>
+				<td>Step content</td>
+				<td><code>''</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>animation</td>
+				<td>Boolean</td>
+				<td>Apply a css fade transition to the popover itself. For transitions to the highlighting and backgrounds, see <code>backdropOptions</code>.</td>
+				<td><code>true</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>container</td>
+				<td>String (jQuery selector)</td>
+				<td>Attachment of popover. Pass an element to append the popover
+					to. By default the popover is appended after the 'element' above.
+					This option is particularly helpful for Internet Explorer.</td>
+				<td><code>'body'</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>backdrop</td>
+				<td>Boolean</td>
+				<td>
+					Show a dark backdrop behind the popover and its element, highlighting the current step. Overrides the global option of the same name.
+				</td>
+				<td><code>false</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>backdropOptions</td>
+				<td>Object</td>
+				<td>
+					Overrides the global option of the same name
+				</td>
+				<td><code>{}</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>redirect</td>
+				<td>Boolean|Function</td>
+				<td>Overrides the global option of the same name, for this step only.</td>
+				<td><code>true</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>reflex</td>
+				<td>Boolean</td>
+				<td>
+					Enable the reflex mode: attach an handler to the step element, so that a click on the element is equivalent to clicking the Next button in the
+					tour popover.
+					<br><br>
+					The class <code>tour-step-element-reflex</code> is added to the element, as hook for your custom style (e.g: cursor: pointer).</td>
+				<td><code>false</code></td>
+			</tr>
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>reflexOnly</td>
+				<td>Boolean</td>
+				<td>
+					When step option <code>reflex === true</code>, this option will remove the Next button from the tour popover. This forces the user to
+					click the step element to continue the tour.
+				</td>
+				<td><code>false</code></td>
+			</tr>
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>preventInteraction</td>
+				<td>Boolean</td>
+				<td>
+					Prevent the user from interacting with the step element (clicking etc). This is useful to highlight a DOM component without allowing the user
+					to potentially disrupt a tour flow by interacting with it.
+				</td>
+				<td><code>false</code></td>
+			</tr>
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>orphan</td>
+				<td>Boolean</td>
+				<td>Indicates this step is an "intended orphan". It will be displayed in the middle of the window, unattached to any element.</td>
+				<td><code>false</code></td>
+			</tr>
+			<tr class="success">
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>showIfUnintendedOrphan <span class="label label-success">NEW v0.3.0</span></td>
+				<td>Boolean</td>
+				<td>Overrides the global option of the same name, for this step only.</td>
+				<td><code>false</code></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>duration</td>
+				<td>Boolean|String</td>
+				<td>Set a expiration time for the steps. When the step expires,
+					the next step is automatically shown. See it as a sort of guided, automatized tour
+					functionality. The value is specified in milliseconds</td>
+				<td><code>false</code></td>
+			</tr>
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>delayOnElement</td>
+				<td>Object</td>
+				<td>
+					Sometimes a step element might not be immediately available (<code>$element.visible() === true</code>) because it's not yet been added to the
+					DOM, a transition effect is delaying it etc. This is a specific issue with Bootstrap Select, which is relatively slow to show the selectpicker
+					dropdown after clicking.
+					<br><br>
+					Use <code>delayOnElement</code> to instruct Tour to wait for any DOM element, not just the step element, to appear before showing the step
+					(or aborting due to missing element). This means the tour step element can be one DOM element, but the delay will wait for a completely separate
+					DOM element to appear. This is really useful for hidden divs or plugins that construct elements on the fly etc.
+					<br><br>
+					Provide an object structured as follows:<br>
+					<code>
+						delayOnElement: {<br>
+						<span class='tab40'>delayElement: string or function</span>,<br>
+						<span class='tab40'>maxDelay: integer</span>,<br>
+						}
+					</code>
+					<br><br>
+					<code>delayElement</code> can be:
+					<ul>
+						<li>the string literal <code>"element"</code> - to wait for this step's element to be available</li>
+						<li>a string of a DOM element ID, e.g.: <code>"#btnWait"</code> - to wait for that DOM element to be available, regardless of the tour step DOM element</li>
+						<li>a function that returns a jquery object, e.g.: <code>function() { return $("#btnPrettyTransition"); }</code></li>
+					</ul>
+					<code>maxDelay</code> is the number of milliseconds to wait for the DOM element specified by <code>delayElement</code>. The default is 2000 milliseconds.
+					<br><br>
+					Use this option in conjunction with <code>onElementUnavailable</code> for robust tour step handling. The <code>maxDelay</code> timeout will be
+					reached before <code>onElementUnavailable</code> is called.
+				</td>
+				<td><code>{}</code></td>
+			</tr>
+
+			<tr>
+				<td></td>
+				<td>template</td>
+				<td>String|Function</td>
+				<td>Overrides the global option of the same name, for this step only, allowing you to customize the appearance for an individual step.</td>
+				<td>
+				</td>
+			</tr>
+
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>showProgressBar<br>showProgressText<br><br>getProgressBarHTML<br>getProgressTextHTML</td>
+				<td></td>
+				<td>
+					Overrides the global options of the same names, for this step only. This allows you to show, hide and customize progress bars and
+					progress texts for individual steps.
+				</td>
+				<td></td>
+			</tr>
+
+
+			<tr>
+				<td></td>
+				<td>onShow<br>onShown<br>onHide<br>onHidden<br>onNext<br>onPrev<br>onPause<br>onResume</td>
+				<td>Function</td>
+				<td>Overrides the global options of the same names, for this step only</td>
+				<td><code>function (tour) { }</code></td>
+			</tr>
+
+
+			<tr>
+				<td></td>
+				<td>onRedirectError</td>
+				<td>Function</td>
+				<td>Function to execute when there is a redirection error. This
+					happens when bootstrap tour cannot redirect to the path of the step. It overrides the global
+					<code>onRedirectError</code> option</td>
+				<td><code>function (tour) { }</code></td>
+			</tr>
+
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>onElementUnavailable</td>
+				<td></td>
+				<td>
+					Overrides the global option of the same name, for this step only. This allows you to have individual error handlers per tour step,
+					giving you full flow control.
+				</td>
+				<td></td>
+			</tr>
+
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td>onModalHidden</td>
+				<td></td>
+				<td>
+					Overrides the global option of the same name, for this step only.
+				</td>
+				<td></td>
+			</tr>
+
+		</tbody>
+    </table>
+  </div>
+</section>
+
+<section id="methods">
+  <div class="container">
+    <div class="page-header">
+      <h2>Methods <small>Always in control</small></h2>
+    </div>
+    <!--<p>If, for some reasons, you want to force the tour to be
+    displayed, pass <code>true</code> to the <code>start()</code>
+    method.</p>-->
+    <table class="table  table-bordered table-striped">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>addSteps(<code>[]</code>)</td>
+          <td>Add multiple steps to the tour. Pass an array of objects.</td>
+        </tr>
+        <tr>
+          <td>addStep(<code>{}</code>)</td>
+          <td>Add single step to the tour. Pass an object.</td>
+        </tr>
+        <tr>
+          <td>start(<code>true</code>)</td>
+          <td>Start the tour. Pass <code>true</code> to force the start.</td>
+        </tr>
+        <tr>
+          <td>restart()</td>
+          <td>Restart the tour after it ended.</td>
+        </tr>
+        <tr>
+          <td>end()</td>
+          <td>End the tour prematurely.</td>
+        </tr>
+        <tr>
+          <td>next()</td>
+          <td>Skip to the next step.</td>
+        </tr>
+        <tr>
+          <td>prev()</td>
+          <td>Go back to the previous step.</td>
+        </tr>
+        <tr>
+          <td>goTo(<code>i</code>)</td>
+          <td>Skip to a specific step. Pass <code>i</code> as the
+          index of the step in the tour (0-based).<br>
+          </td>
+        </tr>
+        <tr>
+          <td>pause()</td>
+          <td>Pause the duration timer. It works only if tour or current step has duration.</td>
+        </tr>
+        <tr>
+          <td>resume()</td>
+          <td>Resume the duration timer. It works only if tour or current step has duration.</td>
+        </tr>
+        <tr>
+          <td>ended()</td>
+          <td>Verify if the tour ended. Returns boolean.</td>
+        </tr>
+        <tr>
+          <td>getStep(<code>i</code>)</td>
+          <td>Get the step object. Pass <code>i</code> as the index
+          of the step in the tour (0-based).</td>
+        </tr>
+        <tr>
+          <td>getCurrentStepIndex()</td>
+          <td>Get the index of the current step.</td>
+        </tr>
+        <tr>
+          <td>setCurrentStep(<code>i</code>)</td>
+          <td>Override the current step. Pass <code>i</code>
+          as the index of the step in the tour (0-based).</td>
+        </tr>
+        <tr>
+          <td>redraw()</td>
+          <td>Triggers a redraw on the overlay element.  Useful for
+          Dynamically sized tour targets.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="multipage">
+    <div class="container">
+        <div class="page-header">
+            <h2>Multipage
+                <small>How to traverse across pages</small>
+            </h2>
+        </div>
+        <p>Bootstrap Tour can be used to create tours that span multiple pages. If you have URLs for each page that have
+            unique paths, and the dependencies are loaded on each page, you can easily create a tour like so:
+        </p>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">tour</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Tour</span><span class="p">({</span>
+  <span class="na">steps</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="na">element</span><span class="p">:</span> <span class="s2">"#my-element"</span><span class="p">,</span>
+      <span class="na">title</span><span class="p">:</span> <span class="s2">"Title of my step"</span><span class="p">,</span>
+      <span class="na">content</span><span class="p">:</span> <span class="s2">"Content of my step"</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="na">element</span><span class="p">:</span> <span class="s2">"#my-other-element"</span><span class="p">,</span>
+      <span class="na">title</span><span class="p">:</span> <span class="s2">"Title of my step"</span><span class="p">,</span>
+      <span class="na">content</span><span class="p">:</span> <span class="s2">"Content of my step"</span><span class="p">,</span>
+      <span class="na">path</span><span class="p">:</span> <span class="s2">"/url/to/go/to/"</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">});</span></code></pre></figure>
+
+        <p>It's that simple.</p>
+
+        <p>If you do not know the URL you wish to go to because it contains a different value per user or per
+            instance, you can use a regular expression as the <code>path</code> attribute and set the redirect
+            attribute to a function that performs the redirect.
+        </p>
+        <p>For example:</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">tour</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Tour</span><span class="p">({</span>
+  <span class="na">steps</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="na">element</span><span class="p">:</span> <span class="s2">"#my-element"</span><span class="p">,</span>
+      <span class="na">title</span><span class="p">:</span> <span class="s2">"Title of my step"</span><span class="p">,</span>
+      <span class="na">content</span><span class="p">:</span> <span class="s2">"Content of my step"</span><span class="p">,</span>
+      <span class="na">redirect</span><span class="p">:</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nb">document</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">href</span> <span class="o">=</span> <span class="s1">'/url/'</span> <span class="o">+</span> <span class="nx">userId</span><span class="p">;</span>
+      <span class="p">};</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="na">element</span><span class="p">:</span> <span class="s2">"#my-other-element"</span><span class="p">,</span>
+      <span class="na">title</span><span class="p">:</span> <span class="s2">"Title of my step"</span><span class="p">,</span>
+      <span class="na">content</span><span class="p">:</span> <span class="s2">"Content of my step"</span><span class="p">,</span>
+      <span class="na">path</span><span class="p">:</span> <span class="nx">Regexp</span><span class="p">(</span><span class="s2">"/\/url\/[^/]+/i"</span><span class="p">)</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">});</span></code></pre></figure>
+
+        <p>Finally, if you are only using GET parameters to define different pages, and wish to redirect using those
+            parameters, you may run into the problem that Bootstrap Tour will consider the path of the two steps to be
+            identical. For example, you cannot use the path parameter to go from your homepage at <code>/</code> to a
+            search results page at <code>/?q=foo</code>, because from Bootstrap Tour's perspective, those are the same
+            location (<code>/</code>).
+        </p>
+        <p>To work around this limitation, you can set the <code>onNext</code> attribute a function that returns a
+            promise.</p>
+        <p>For example:</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">tour</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Tour</span><span class="p">({</span>
+  <span class="na">steps</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="na">element</span><span class="p">:</span> <span class="s2">"#my-element"</span><span class="p">,</span>
+      <span class="na">title</span><span class="p">:</span> <span class="s2">"Title of my step"</span><span class="p">,</span>
+      <span class="na">content</span><span class="p">:</span> <span class="s2">"Content of my step"</span><span class="p">,</span>
+      <span class="na">onNext</span><span class="p">:</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nb">document</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">href</span> <span class="o">=</span> <span class="s1">'/?q=foo'</span><span class="p">;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="k">new</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">Deferred</span><span class="p">()).</span><span class="nx">promise</span><span class="p">();</span>
+      <span class="p">};</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="na">element</span><span class="p">:</span> <span class="s2">"#my-other-element"</span><span class="p">,</span>
+      <span class="na">title</span><span class="p">:</span> <span class="s2">"Title of my step"</span><span class="p">,</span>
+      <span class="na">content</span><span class="p">:</span> <span class="s2">"Content of my step"</span><span class="p">,</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">});</span></code></pre></figure>
+
+        <p>Doing this will prevent the next step from popping up while the redirect is being completed in the
+            <code>onNext</code> function.
+        </p>
+    </div>
+</section>
+
+
+		<section id="backdropOptions">
+			<div class="container">
+				<div class="page-header">
+					<h2>backdropOptions <small>get with the fancy fancy</small></h2>
+				</div>
+				<p>
+					With huge thanks to @ibastevan, who provided a lot of the code and input to getting this working.
+				</p>
+				<p>
+					Tourist now uses overlays to highlight tour step elements. A single backdrop div provides the dark/black background, and a highlight div is used
+					to highlight the element of a tour step. Each tour step element is then adjusted by zindex to pop to the top. This option could be considered not
+					exactly simple to understand initially, so please play around with it.
+				</p>
+				<p>
+					The option <code>backdropOptions</code> has been added globally, and can be overridden per step. <code>backdropOptions</code> is an object structured
+					as follows (these are the default options, used if you do not set this option in your tour):
+				</p>
+				<pre>
+<code>
+backdropOptions:
+{
+	highlightOpacity:	0.8,
+	highlightColor:		#FFF,
+	animation:	{
+					// can be string of css class or function signature: function(domElement, step) {}
+					backdropShow:			function(domElement) { domElement.fadeIn(); },
+					backdropHide:			function(domElement) { domElement.fadeOut("slow") },
+					highlightShow:			function(domElement, step)
+											{
+												step.fnPositionHighlight();
+												domElement.fadeIn();
+											},
+					highlightTransition:	"tour-highlight-animation",
+					highlightHide:			function(domElement) { domElement.fadeOut("slow") }
+				},
+}
+								</code>
+				</pre>
+
+				<p>
+					<b>Explanation - <code>backdropOptions</code>:</b>
+					<br>
+					<code>backdropOptions.highlightOpacity</code> - the alpha value of the div used to highlight the step element. You can control how visible/occluded the element is.
+					<code>backdropOptions.highlightColor</code> - the hex color code for the highlight. Normally you will want to use a white highlight (#FFF). However if your step element
+															has a dark or black background, you may want to use a black highlight (#000). Experiment with the best colors for your UX.
+				</p>
+
+				<p class='top-buffer'>
+					<b>Explanation - <code>backdropOptions.animation</code>:</b>
+					<br>
+					The options within backdropOptions.animation can be either string literals specifying a CSS class, or a function. The application of these
+					features work in exactly the same way for all backdropOptions.animation options.
+					<br>
+					These options apply as per the following:
+				</p>
+				<ul>
+					<li><code>backdropShow</code>:			when a previously hidden backdrop is shown</li>
+					<li><code>backdropHide</code>:			when a previously visible backdrop is hidden</li>
+					<li><code>highlightShow</code>:			when step N did not have an element, and step N+1 does have an element</li>
+					<li><code>highlightHide</code>:			when step N has an element, and step N+1 does not have an element</li>
+					<li><code>highlightTransition</code>:	when both step N and step N+1 have an element, and the highlight is visibly moved from one to the other</li>
+				</ul>
+
+				<p class='top-buffer'>
+					The highlight is the div that creates the "visibility" effect over a tour step element. This option is how a nice slide/move/transition effect
+					between steps is possible. They also now allow handling of rotated elements etc.
+				</p>
+
+				<p>
+					<b>If a CSS class name (as a string literal) is provided for any of the <code>backdropOptions.animation</code> options</b>
+					<br>
+						This class will be applied to the specified element at the specified time and removed afterwards. You can use this
+						class to add transition effects. For example, assume you create a class in your CSS that animates an effect as follows:
+				<pre>
+<code>
+.my-custom-animation {
+  -webkit-transition: all .5s ease-out;
+  -moz-transition: all .5s ease-out;
+  -ms-transition: all .5s ease-out;
+  -o-transition: all .5s ease-out;
+  transition: all .5s ease-out;
+}
+</code>
+				</pre>
+
+				You can then use this effect every time the background overlay div is shown by specifying it as follows:
+
+				<pre>
+<code>
+var tour = new Tour({
+    steps:	[ .....	],
+    backdropOptions: {
+                        animation:  {
+                                        backdropShow: "my-custom-animation"
+                                    }
+                    }
+});
+</code>
+				</pre>
+				<br>
+				Now, when moving between step N where step option backdrop == false, and step N + 1 where step option backdrop == true, your class will be used
+				to implement the transition. The class will be added before the backdrop is shown, and removed when the transition is complete. In other words,
+				specifying a CSS class for backdropShow is functionally equivalent to the following code executed when the tour moves between steps:
+
+				<pre>
+<code>
+$(backdropOptions element).addClass("my-custom-animation");
+$(backdropOptions element).show(0, function()
+{
+	$(this).removeClass("my-custom-animation");
+});
+</code>
+				</pre>
+				Note that the class is removed after the element is visible, therefore only use this option for CSS transitions - do not use it for
+				"persistent" CSS changes.
+				<br>
+				The same approach applies to all the other options, i.e.: if a class is specified for highlightTransition, the class is applied, the highlight
+				div is moved to its new position, and the class is removed.
+				</p>
+
+
+
+				<p>
+					<b>If a function is provided for any of the <code>backdropOptions.animation</code> options</b>
+					<br><br>
+					If you provide a function, your code is <b>100% responsible</b> for positioning and showing the highlight overlay element.
+					<br><br>
+					It's more hassle - why would you want to do this? Simply, Tourist can only provide a fairly standard/default set of transitions, especially where
+					the highlightTransition option is concerned. If you want your tour to have an especially fancy or featured/custom transition, you can use this option
+					to achieve that. You can also work with rotated or transformed elements using this feature.
+				</p>
+				<p>
+					Most of the time you will not need to use this option, and specifying a CSS class will be sufficient. But the option is here if you need it.
+					<br>
+					When specifying a function, it must have the following signature:
+				</p>
+				<pre><code>
+function(domElement, step)
+{
+}
+				</code></pre>
+				<p>
+					The <code>domElement</code> parameter provides a jquery object for the element you must manipulate. For example, if you have specified a function for
+					<code>backdropOptions.animation.highlightShow</code>, then <code>domElement</code> will be the highlighting div. You must then correctly position and
+					show this div over the step element.
+				</p>
+				<p>
+					The <code>step</code> parameter provides an object with information about the step, to help you decide how to execute the transition. It has the
+					following properties, most of which are taken from your tour step. They are re-provided to you for ease, in case you want to create some clever
+					central animation feature etc:
+				</p>
+
+				<pre><code>
+step =
+{
+    element:                the actual step element, even if the tour uses a function for this step.element option
+    container:              the container option (string) as specified in the step or globally, to help you decide
+                            how to set up the transition
+    backdrop:               as per step option (bool),
+    preventInteraction:     as per step option (bool),
+    isOrphan:               whether is step is actually an orphan, because the element was wrong and
+                            showIfUnintendedOrphan == true or for some other reason (bool),
+    orphan:                 as per step option (bool),
+    showIfUnintendedOrphan: as per step option (bool),
+    duration:               as per step option (bool),
+    delay:                  as per step option (bool),
+    fnPositionHighlight:    a helper function to position the highlight element
+};
+				</code></pre>
+
+				<p>
+					The <code>fnPositionHighlight</code> is provided to make it easy for you to automatically position the highlight div on top of the tour step element. The
+					function simply performs the following:
+				</p>
+
+				<pre><code>
+function fnPositionHighlight()
+{
+	$(DOMID_HIGHLIGHT).width(_stepElement.outerWidth()).height(_stepElement.outerHeight()).offset(_stepElement.offset());
+}
+				</code></pre>
+
+				<p>
+				This allows you to do the following in your customized transition code:
+				</p>
+
+				<pre><code>
+function(domElement, step)
+{
+	// do whatever setup for your custom transition
+	step.fnPositionHighlight();
+}
+				</code></pre>
+
+				<p>
+				It simply saves some typing.
+				</p>
+
+				<div class='top-buffer'></div>
+		<h4>An example of implementing backdropOptions</h4>
+
+		<p>
+			Per step option:
+		</p>
+
+						<pre><code>
+
+var tourSteps = [
+{
+    element: &quot;#btnSomething&quot;,
+    title: &quot;Default&quot;,
+    content: &quot;This tour step will use the default Tour.backdropOptions settings&quot;
+},
+{
+    element: &quot;#btnSomethingElse&quot;,
+    title: &quot;Default&quot;,
+    content: &quot;This tour step will use the per step transitions as specified&quot;
+    backdropOptions:
+    {
+        // specify some options and use the defaults for the rest
+        highlightColor:		#000,	// this step element has a black background, so this RGB looks better
+        animation: {
+                        // use a function to manually hide the highlight
+                        highlightHide: function(domElement, step)
+                                        {
+	                                        domElement.fadeOut(&quot;slow&quot;)
+                                        }
+                    },
+    }
+};
+
+
+var tour = new Tour({
+                        steps: tourSteps,
+                        backdropOptions: {
+                                            // default for all Tour steps
+                                            highlightColor: #FFF
+                                        }
+                    });
+				</code></pre>
+			</div>
+		</section>
+
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" crossorigin="anonymous"></script>
+
+<script src="../bootstrap-tourist.js"></script>
+
+<script>
+	var tourSteps = [
+						{
+							orphan: true,
+							title: "Bootstrap Tourist",
+							content: "This tour is designed to show you the simplest way to create your first tour."
+						},
+						{
+							element: "#intro",
+							placement: "bottom",
+							title: "Bootstrap Tourist",
+							content: "A step with an element"
+						},
+						{
+							element: function() { return $("#contents"); },
+							title: "Bootstrap Tourist",
+							content: "Element found by function"
+						}
+					];
+
+		var tour = new Tour({
+								framework: "bootstrap3",
+								name: "tour",
+								steps: tourSteps,
+								storage: window.localStorage,
+								debug: true,
+								backdrop: true
+							});
+
+		$("#btnStart").on("click", function()
+		{
+			// Use .restart to always start the tour. Normally you'd use tour.start(), and perhaps onPreviouslyEnded.
+			tour.restart();
+		});
+</script>
+
+
+</body></html>
