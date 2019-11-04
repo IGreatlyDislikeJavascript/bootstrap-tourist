@@ -13,56 +13,57 @@ Tourist works with Bootstrap 3.4 and 4.3 (specify "framework" option), however t
 There are some bugs in earlier BS3 and BS4, and jquery versions, that cause problems with Tourist. Please use minimum Bootstrap 3.4.x or 4.3.x, jquery 3.3.1 to avoid. Earlier versions may work, but try for yourself.
 
 ## Getting started with Bootstrap Tourist
-Simply include bootstrap-tourist.js and bootstrap-tourist.css into your page. A minified version is not provided because the entire purpose of this repo is to enable fixes, features and native port to ES6. If you are uncomfortable with this, please use the original Bootstrap Tour!
+If you are new to Bootstrap Tourist, and don't have Bootstrap Tour working, it's as simple as doing the following:
+1. Simply include bootstrap-tourist.js and bootstrap-tourist.css into your page:
+    ```html
+    <link href="bootstrap-tourist.css" rel="stylesheet">
 
-```html
-<link href="bootstrap-tourist.css" rel="stylesheet">
-....
-<script src="bootstrap-tourist.js"></script>
-```
+    ...
 
-Next, set up and start your tour with some steps:
-```js
-const tour = new Tour({
-    framework: 'bootstrap3',   // or "bootstrap4" depending on your version of bootstrap
-    steps: [
-        {
-            element: '#my-element',
-            title: 'Title of my step',
-            content: 'Content of my step'
-        },
-        {
-            element: '#my-other-element',
-            title: 'Title of my step',
-            content: 'Content of my step'
-        }
-    ]
-});
+    <script src="bootstrap-tourist.js"></script>
+    ```
+1. Next, set up and start your tour with some steps:
+    ```js
+    var tour = new Tour({
+        framework: 'bootstrap3',   // or "bootstrap4" depending on your version of bootstrap
+        steps: [
+            {
+                element: '#my-element',
+                title: 'Title of my step',
+                content: 'Content of my step'
+            },
+            {
+                element: '#my-other-element',
+                title: 'Title of my step',
+                content: 'Content of my step'
+            }
+        ]
+    });
 
-// Start the tour - note, no call to .init() is required
-tour.start();
-```
+    // Start the tour - note, no call to .init() is required
+    tour.start();
+    ```
+
+**NOTE**: A minified version is not provided because the entire purpose of this repo is to enable fixes, features and native port to ES6. If you are uncomfortable with this, please use the original Bootstrap Tour!
 
 ## Switching from Tour to Tourist
 If you already have a working tour using Bootstrap Tour, and you want to move to Tourist (because it has some fixes etc), perform the following steps:
-
 1. Copy over the Tourist CSS and JS, include them instead of Bootstrap Tour
-    - If you are using Bootstrap 4, add the `framework: 'bootstrap4'` option to your initialization code, eg.
-    ```js
-    const tour = new Tour({
-        name: 'tourist',
-        steps: [...steps go here...],
-        debug: true,               // you may wish to turn on debug for the first run through
-        framework: 'bootstrap4',   // set Tourist to use BS4 compatibility
-    });
-    ```
+    - If you are using Bootstrap 4, add the `framework: 'bootstrap4'` option to your initialization code.
+    - Example:
+        ```js
+        const tour = new Tour({
+            name: 'tourist',
+            steps: [...steps go here...],
+            debug: true,               // you may wish to turn on debug for the first run through
+            framework: 'bootstrap4',   // set Tourist to use BS4 compatibility
+        });
+        ```
 1. Remove the call to `tour.init()` - this is not required
-1. Add a call to tour.start() to start the tour, and optionally add a call to tour.restart() to force restart the tour
+1. Add a call to `tour.start()` to start the tour, and optionally add a call to `tour.restart()` to force restart the tour
 
 ## Basic Demo and Documentation
-Tourist now has documentation included in the repo /docs/ folder. Take a look!
-
-# Documentation note
+Tourist now has documentation included in the repo under the `/docs/` folder. Take a look!
 1. Control flow from `onNext()` / `onPrevious()` options:
    - Returning false from onNext/onPrevious handler will prevent Tour from automatically moving to the next/previous step.
    - Tour flow methods (Tour.goTo etc) now also work correctly in onNext/onPrevious.
