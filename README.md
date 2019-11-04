@@ -107,7 +107,7 @@ Tourist now has documentation included in the repo under the `/docs/` folder. Ta
 1. Do not call `tour.init()`:
     - When setting up Tour, do not call `tour.init()`. Call `tour.start()` to start/resume the Tour from previous step. Call `tour.restart()` to always start Tour from the first step
     `tour.init()` was a redundant method that caused conflict with hidden Tour elements.
-    - As of Tourist v0.11, calling `tour.init()` will generate a warning in the console (thanks to @pau1phi11ips).
+    - As of Tourist v0.11, calling `tour.init()` will generate a warning in the console (thanks to [@pau1phi11ips](https://github.com/pau1phi11ips)).
 1. Dynamically determine element by function:
     - Step "element:" option allows element to be determined programmatically. Return a jquery object. The following is possible:
         ```js
@@ -193,7 +193,7 @@ Tourist now has documentation included in the repo under the `/docs/` folder. Ta
     - **IMPORTANT**: orphan steps are stuck to the center of the screen. However steps linked to elements ALWAYS stay stuck to their element, even if user scrolls the element & tour popover off the screen. This is my personal preference, as original functionality of tour step moving with the scroll even when the element was off the viewport seemed strange.
 1. Customizable progress bar & text
     1. Progress bar & progress text:
-        - With thanks to @macroscian, @thenewbeat for fixes to this code, incorporated in Tourist v0.12
+        - With thanks to [@macroscian](](https://github.com/macroscian), [@thenewbeat](](https://github.com/thenewbeat) for fixes to this code, incorporated in Tourist v0.12
         - Use the following options globally or per step to show tour progress:
             - `showProgressBar`: shows a bootstrap progress bar for tour progress at the top of the tour content
             - `showProgressText`: shows a textual progress (N/X, i.e.: 1/24 for slide 1 of 24) in the tour title
@@ -477,8 +477,8 @@ Tourist now has documentation included in the repo under the `/docs/` folder. Ta
             });
             ```
 1. Change text for the buttons in the popup (also, preparation for future localization options):
-    - With thanks to @vneri (https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/pull/8) for the original change
-    - With thanks to @DancingDad, @thenewbeat, @bardware for the fixes/updates
+    - With thanks to [@vneri](https://github.com/vneri) (https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/pull/8) for the original change
+    - With thanks to [@DancingDad](https://github.com/DancingDad), [@thenewbeat](https://github.com/thenewbeat), [@bardware](https://github.com/bardware) for the fixes/updates
     - You can now change the text displayed for the buttons used in the tour step popups. For this, there is a new object you can pass to the options, called "localization". This option only applies to the default templates. If you specify your own custom template, the localization.buttonTexts option has no effect on the basis that you will make any changes to your own template directly.
         ```js
         var tour = new Tour({
@@ -506,7 +506,7 @@ Tourist now has documentation included in the repo under the `/docs/` folder. Ta
         });
         ```
 1. Added `showIfUnintendedOrphan`:
-    - With thanks to @diesl
+    - With thanks to [@diesl](https://github.com/diesl)
     - To show a tour step as an orphan if its element doesn't exist, overriding `onElementUnavailable`
     - If a tour step specifies an element, and the element doesn't exist, `showIfUnintendedOrphan` will show the tour step as an orphan. This ensures your tour step will always be shown.
     - `delayOnElement` takes priority over `showIfUnintendedOrphan`, i.e. if you specify both delayOnElement and showIfUnintendedOrphan, the delay will timeout before the step will be shown as an orphan.
@@ -540,7 +540,7 @@ Tourist now has documentation included in the repo under the `/docs/` folder. Ta
         ];
         ````
 1. Overlay divs and customizable transitions between tour steps:
-    - With huge thanks to @ibastevan, who provided a lot of the code and input to getting this working. Read more here: https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/pull/24
+    - With huge thanks to [@ibastevan](https://github.com/ibastevan), who provided a lot of the code and input to getting this working. Read more here: https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/pull/24
     - Tourist now uses overlays to highlight tour step elements. A single backdrop div provides the dark/black background, and a highlight div is used to highlight the element of a tour step. Each tour step element is then adjusted by zindex to pop to the top.
     - This option could be considered not exactly simple to understand initially, so please play around with it.
     - A new set of options called backdropOptions has been added globally, and can be overridden per step.
