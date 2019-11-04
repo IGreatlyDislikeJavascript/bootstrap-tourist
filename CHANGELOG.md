@@ -6,11 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
- - Added .gitignore, .npmignore, and package.json
+ - Added .gitignore
+ - Added .npmignore
+ - Added package.json
  - Created CHANGELOG
 
 ### Changed
  - Updated README
+
+### Removed
+ - Removed comments from bootstrap-tourist.js
 
 ## [0.3.0]
 
@@ -18,15 +23,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
  - Added `showIfUnintendedOrphan` to show a tour step as an orphan if its element doesn't exist, overriding `onElementUnavailable`
 
 ### Changed
- - new method of backdrop and highlight added, with major effort and code from @ibastevan:
-    - Overlay divs and customizable transitions between tour steps
-    - https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/pull/24
+ - New method of backdrop and highlight added, with major effort and code from [@ibastevan](https://github.com/ibastevan):
+    - Overlay divs and customizable transitions between tour steps, [read more here](https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/pull/24)
     - In short, previous versions of Tourist (and original Tour) used 4 divs to bracket the tour step elements. Tourist now uses overlays to produce the same effect. This solves many problems and enables many new features, including customizable transitions between tour steps.
 
-## [0.2.1]
+## 0.2.1
 
 ### Changed
- - `delayOnElement` option now waits for elements not yet created in the DOM (thanks to @lukaszmn)
+ - `delayOnElement` option now waits for elements not yet created in the DOM (thanks to [@lukaszmn](https://github.com/lukaszmn))
 
 ## [0.2.0]
 
@@ -36,14 +40,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## 0.0.12-beta:
 
 ### Fixed
- - fixes to the button text change code and better prep for localization (thanks to @DancingDad, @thenewbeat, @bardware)
- - fixed css for BS4 progress text to correctly use float-right (thanks to @macroscian, @thenewbeat)
+ - fixes to the button text change code and better prep for localization (thanks to [@DancingDad](https://github.com/DancingDad), [@thenewbeat](https://github.com/thenewbeat), [@bardware](https://github.com/bardware))
+ - fixed css for BS4 progress text to correctly use float-right (thanks to [@macroscian](https://github.com/macroscian), [@thenewbeat](https://github.com/thenewbeat))
 
 ## [0.10-beta]:
 
 ### Added
- - added support for changing button texts (thanks to @vneri)
- - added dummy `init()` to support drop-in replacement for Tour (thanks to @pau1phi11ips)
+ - added support for changing button texts (thanks to [@vneri](https://github.com/vneri))
+ - added dummy `init()` to support drop-in replacement for Tour (thanks to [@pau1phi11ips](https://github.com/pau1phi11ips))
 
 ## 0.0.9-beta:
 
@@ -54,25 +58,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
  - major change to manipulation of BS4 popper.js for orphan steps
  - change to implementation of backdrop
 
-### Fixed
- - auto progress bar was killed in changes 0.7 -> 0.8 due to Bootstrap sanitizer, this is readded
-
 ### Removed
  - `smartPlacement` option removed, deprecated
 
-## 0.0.8-beta:
-
 ### Fixed
- - Fix in 0.0.7-beta didn't work for Bootstrap 4. This release is to ensure fully working popovers in BS4. Issue is that the Bootstrap CDN doesn't actually have the whitelist property, so developing against it is basically useless :(
+ - auto progress bar was killed in changes 0.7 -> 0.8 due to Bootstrap sanitizer, this is readded
+
+## 0.0.8-beta:
 
 ### Changed
  - Improved BS4 support and template switching. Changed options for framework vs template.
 
+### Fixed
+ - Fix in 0.0.7-beta didn't work for Bootstrap 4. This release is to ensure fully working popovers in BS4. Issue is that the Bootstrap CDN doesn't actually have the whitelist property, so developing against it is basically useless :(
+
 ## 0.0.7-beta:
 
 ### Fixed
- - Fix breaking change in Bootstrap 3.4.1, fixes this issue: https://github.com/sorich87/bootstrap-tour/issues/723#issuecomment-471107788
-    Issue is caused by the BS sanitizer, to avoid this reoccurring the "sanitizeWhitelist:" and "sanitizeFunction:" global options added
+ - Fix breaking change in Bootstrap 3.4.1, fixes this issue: https://github.com/sorich87/bootstrap-tour/issues/723#issuecomment-471107788. Issue is caused by the BS sanitizer, to avoid this reoccurring the "sanitizeWhitelist:" and "sanitizeFunction:" global options added
 
 ## 0.0.6-beta:
 
@@ -88,9 +91,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
  - Added "unfix" for bootstrap selectpicker to revert zindex after step that includes this plugin
 
+### Changed
+ - Improved the background overlay and scroll handling, unnecessary work removed
+
 ### Fixed
  - Fixed issue with Bootstrap dialogs. Handling of dialogs is now robust
  - Fixed issue with BootstrapDialog plugin: https://nakupanda.github.io/bootstrap3-dialog/ . See notes below for help.
-
-### Changed
- - Improved the background overlay and scroll handling, unnecessary work removed
