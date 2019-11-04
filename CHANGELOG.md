@@ -1,8 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
@@ -10,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Added .gitignore, .npmignore, and package.json
  - Created CHANGELOG
 
-## Changed
+### Changed
  - Updated README
  - starting to follow semantic versioning
 
@@ -63,6 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - `smartPlacement` option removed, deprecated
 
 ## 0.0.8-beta:
+
 ### Fixed
  - Fix in 0.0.7-beta didn't work for Bootstrap 4. This release is to ensure fully working popovers in BS4. Issue is that the Bootstrap CDN doesn't actually have the whitelist property, so developing against it is basically useless :(
 
