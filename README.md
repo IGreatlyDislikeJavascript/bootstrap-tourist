@@ -7,10 +7,11 @@ Bootstrap Tourist (called "Tourist" from here) is a fork of Bootstrap Tour, a pl
 
 The original Bootstrap Tour was written in coffeescript, and had a number of open feature and bug fix requests in the github repo. Bootstrap Tourist is an in-progress effort to move Bootstrap Tour to native ES6, fix some issues and add some requested features. You can read more about why Bootstrap Tourist exists, and why it's not a github fork anymore, here: https://github.com/sorich87/bootstrap-tour/issues/713
 
-This repo has been created to give an easy way to update and track the revisions to the code, rather than filling up the original Tour forum.
+Tourist works with Bootstrap 3.4 and 4.3 (specify "framework" option), however the "standalone" non-Bootstrap version is not available
 
+## Minimum Bootstrap / jquery requirements
+There are some bugs in earlier BS3 and BS4, and jquery versions, that cause problems with Tourist. Please use minimum Bootstrap 3.4.x or 4.3.x, jquery 3.3.1 to avoid. Earlier versions may work, but try for yourself.
 
-Tourist works with Bootstrap 3 and 4 (specify "framework" option), however the "standalone" non-Bootstrap version is not available
 
 ## Changelog from previous version:
 
@@ -121,6 +122,19 @@ from v0.3.0:
 
  16. Added showIfUnintendedOrphan to show a tour step as an orphan if its element doesn't exist, overriding onElementUnavailable
  17. Overlay divs and customizable transitions between tour steps
+
+
+## Policy on NPM, semantic versioning, releases, code structure etc
+I'm a self-taught C++/x86 asm coder from the 80's and 90's. I'm not a web developer, I only have basic html, js, jquery knowledge that I pretty much taught myself over a couple of weeks or so. This isn't my full time job, or even my part time job. I inherited the need to fix some stuff in Bootstrap Tour, and I simply published my fixes on github. I never intended to take on maintenance of a product, or become responsible for it in any way. I even said this in the Tour repo when I published my first fixes.
+
+All of that info is to set your expectations. Tourist works, and it's been thoroughly tested, but I keep getting tripped up by the niceties of modern coding. Tourist is offered as a non-minified, simple download-and-drop-in tool for you to use if you want to. I will do my best to follow coding standards, publish to npm when I remember, keep to a coding style, follow semantic versioning and all that stuff that makes it easy for you to use this plugin. However please fully expect that:
+
+1. I will probably fail, so you'll need to tell me what I've done wrong and most importantly how to fix it
+2. The github repo will always have the latest in-progress version
+3. The github release will always be the latest stable version
+4. Anything else is a bonus.
+
+As a side note, Bootstrap Tour was made in coffeescript (which I'd never heard of). So when I started working on Tourist, it was using a codebase without comments, odd transpilation structures and approaches, and much more. So if you're looking at the source and scratching your head as to why something is done in a certain way - yes, welcome to my world :-)
 
 
 ## Contributing
