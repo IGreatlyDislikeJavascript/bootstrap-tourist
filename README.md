@@ -691,14 +691,12 @@ Tourist now has documentation included in the repo under the `/docs/` folder. Ta
 I'm a self-taught C++/x86 asm coder from the 80's and 90's. I'm not a web developer, I only have basic html, js, jquery knowledge that I pretty much taught myself over a couple of weeks or so. This isn't my full time job, or even my part time job. I inherited the need to fix some stuff in Bootstrap Tour, and I simply published my fixes on github. I never intended to take on maintenance of a product, or become responsible for it in any way. I even said this in the Tour repo when I published my first fixes.
 
 All of that info is to set your expectations. Tourist works, and it's been thoroughly tested, but I keep getting tripped up by the niceties of modern coding. Tourist is offered as a non-minified, simple download-and-drop-in tool for you to use if you want to. I will do my best to follow coding standards, publish to npm when I remember, keep to a coding style, follow semantic versioning and all that stuff that makes it easy for you to use this plugin. However please fully expect that:
-
 1. I will probably fail, so you'll need to tell me what I've done wrong and most importantly how to fix it
-2. The github repo will always have the latest in-progress version
-3. The github release will always be the latest stable version
-4. Anything else is a bonus.
+1. The github repo will always have the latest in-progress version
+1. The github release will always be the latest stable version
+1. Anything else is a bonus.
 
 As a side note, Bootstrap Tour was made in coffeescript (which I'd never heard of). So when I started working on Tourist, it was using a codebase without comments, odd transpilation structures and approaches, and much more. So if you're looking at the source and scratching your head as to why something is done in a certain way - yes, welcome to my world :-)
-
 
 ## Contributing
 Feel free to contribute with pull requests, bug reports or enhancement suggestions.
