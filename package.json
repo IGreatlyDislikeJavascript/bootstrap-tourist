@@ -1,6 +1,6 @@
 {
   "name": "bootstrap-tourist",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Quick and easy way to build your product tours with Bootstrap Popovers for Bootstrap 3 and 4",
   "main": "bootstrap-tourist.js",
   "scripts": {
