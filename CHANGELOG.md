@@ -39,13 +39,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
  - fix bug preventing `element: function(){...}` feature under BS4/popper.js
 
-## 0.0.12-beta:
+## [0.0.12-beta]:
 
 ### Fixed
  - fixes to the button text change code and better prep for localization (thanks to [@DancingDad](https://github.com/DancingDad), [@thenewbeat](https://github.com/thenewbeat), [@bardware](https://github.com/bardware))
  - fixed css for BS4 progress text to correctly use float-right (thanks to [@macroscian](https://github.com/macroscian), [@thenewbeat](https://github.com/thenewbeat))
 
-## [0.10-beta]:
+## [0.0.10-beta]:
 
 ### Added
  - added support for changing button texts (thanks to [@vneri](https://github.com/vneri))
@@ -99,3 +99,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
  - Fixed issue with Bootstrap dialogs. Handling of dialogs is now robust
  - Fixed issue with BootstrapDialog plugin: https://nakupanda.github.io/bootstrap3-dialog/ . See notes below for help.
+
+
+[unreleased]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/compare/0.2.0...v0.2.0
+[0.0.12-beta]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.10-beta...0.2.0
+[0.0.10-beta]: https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/releases/tag/v0.10-beta
