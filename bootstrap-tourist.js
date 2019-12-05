@@ -1,6 +1,6 @@
 /* ========================================================================
  *
- * Bootstrap Tourist v0.3.0
+ * Bootstrap Tourist v0.3.2
  * Copyright FFS 2019
  * @ IGreatlyDislikeJavascript on Github
  *
@@ -11,16 +11,10 @@
  *
  * The entire purpose of this fork is to start rewriting bootstrap-tour
  * into native ES6 instead of the original coffeescript, and to implement
- * the features and fixes requested in the github repo. Ideally this fork
- * will then be taken back into the main repo and become part of
- * bootstrap-tour again - this is not a fork to create a new plugin!
+ * the features and fixes requested.
  *
  * I'm not a JS coder, so suggest you test very carefully and read the
- * docs (comments) below before using.
- *
- * If anyone would like to take on the creation of proper docs for
- * Tourist, please feel free and post here:
- * https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/issues/15
+ * docs before using.
  *
  * ========================================================================
  * ENTIRELY BASED UPON:
@@ -56,7 +50,9 @@
 })(window, function ($) {
 
 	const DOMID_BACKDROP = "#tourBackdrop";
+	const DOMID_BACKDROP_TEMP = "#tourBackdrop-temp"; // used for @ibastevan zindex fix: https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/issues/38
 	const DOMID_HIGHLIGHT = "#tourHighlight";
+	const DOMID_HIGHLIGHT_TEMP = "#tourHighlight-temp"; // used for @ibastevan zindex fix: https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/issues/38
 	const DOMID_PREVENT = "#tourPrevent";
 
 	var Tour, document, objTemplates, objTemplatesButtonTexts;
@@ -114,6 +110,7 @@
 										backdropOptions:	{
 																highlightOpacity:			0.9,
 																highlightColor:				"#FFF",
+                                                                backdropSibling:            false,
 																animation:	{
 																				// can be string of css class or function signature: function(domElement, step) {}
 																				backdropShow:			function(domElement, step)
@@ -329,7 +326,7 @@
 															host: '',
 															placement: 'right',
 															positioning:{
-																			adjustRelative: null
+																			adjustRelative: null	// this does nothing at the moment
 																		},
 															title: '',
 															content: '<p></p>',
@@ -436,7 +433,6 @@
 
 			// BS3: resize event must destroy and recreate both popper and background to ensure correct positioning
 			// BS4: resize must destroy and recreate background, but popper.js handles popper positioning.
-			// TODO: currently we destroy and recreate for both BS3 and BS4. Improvement could be to reposition backdrop overlay only when using BS4
 			var _this = this;
 			$(window).on("resize.tour-" + _this._options.name,	function()
 																{
@@ -1848,6 +1844,8 @@
 			{
 				$(DOMID_BACKDROP).hide(0);
 				$(DOMID_HIGHLIGHT).hide(0);
+                $(DOMID_BACKDROP_TEMP).remove();
+                $(DOMID_HIGHLIGHT_TEMP).remove();
 			}
         };
 
@@ -2136,6 +2134,22 @@
 					}
 				}
 			}
+
+			// purpose of this code is due to elements with position: fixed and z-index: https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/issues/38
+			$(DOMID_BACKDROP_TEMP).remove();
+			$(DOMID_HIGHLIGHT_TEMP).remove();
+            if (step.backdropOptions.backdropSibling == true)
+            {
+                $(DOMID_HIGHLIGHT).addClass('tour-behind');
+                $(DOMID_BACKDROP).addClass('tour-zindexFix');
+                $(DOMID_HIGHLIGHT).clone().prop('id', DOMID_HIGHLIGHT_TEMP.substring(1)).removeClass('tour-behind').insertAfter(".tour-highlight-element");
+                $(DOMID_BACKDROP).clone().prop('id', DOMID_BACKDROP_TEMP.substring(1)).removeClass('tour-zindexFix').insertAfter(".tour-highlight-element");
+            }
+            else
+            {
+                $(DOMID_HIGHLIGHT).removeClass('tour-behind');
+                $(DOMID_BACKDROP).removeClass('tour-zindexFix');
+            }
         };
 
 		// Updates visibility of the preventInteraction div and any other overlay elements added in future features

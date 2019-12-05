@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.3.2]
+
+### Added
+ - backdropOptions.backdropSibling added by [@ibastevan] to solve [position fixed and zindex issues] (https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/issues/38)
+
+### Changed
+ - Updated docs
+
+
 ## [0.3.1]
 
 ### Added

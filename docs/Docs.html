@@ -527,7 +527,7 @@ tour.start();
 			</tr>
 			<tr class="success">
 				<td><span class="label label-info"><b>*</b></span></td>
-				<td>backdropOptions <span class="label label-success">NEW v0.3.0</span></td>
+				<td>backdropOptions <span class="label label-success">NEW v0.3.2</span></td>
 				<td>Object</td>
 				<td>
 					<p>
@@ -544,6 +544,7 @@ tour.start();
 						backdropOptions:	{<br>
 						<div class="tab40">highlightOpacity:	0.8,<br>
 							highlightColor:		#FFF,<br>
+							backdropSibling:	false,<br>
 							animation:	{}<br>
 						</div>}<br>
 					</code>
@@ -554,16 +555,30 @@ tour.start();
 				<td><span class="label label-info"><b>*</b></span></td>
 				<td><span class="tab40"<i>backdropOptions.</i>highlightOpacity</span></td>
 				<td>Float</td>
-				<td>The alpha / opacity value for the highlight element - the div that floats on top of a tour step's element to visually identify it</td>
+				<td>The alpha / opacity value for the highlight element - the div that floats on top of a tour step's element to visually identify it.
+					Set the predominant option here, and override per step as required.</td>
 				<td><code>0.8</code></td>
 			</tr>
 			<tr>
 				<td><span class="label label-info"><b>*</b></span></td>
 				<td><span class="tab40"<i>backdropOptions.</i>highlightColor</span></td>
 				<td>Hex value</td>
-				<td>The RGB hex value of the highlight. Normally, this will be white / #FFF. However if your step element has a black or dark backgroup then you may
-					wish to set this to #000 or some other color.</td>
+				<td>The RGB hex value of the highlight. Normally, this will be white / #FFF. However if your step element has a black or dark background then you may
+					wish to set this to #000 or some other color. Set the predominant option here, and override per step as required.</td>
 				<td><code>#FFF</code></td>
+			</tr>
+			<tr>
+				<td><span class="label label-info"><b>*</b></span></td>
+				<td><span class="tab40"<i>backdropOptions.</i>backdropSibling</span></td>
+				<td>Boolean</td>
+				<td>
+					If a step element is a DOM child of an element that has <code>position: fixed</code> or a <code>z-index</code>, CSS and rendering rules will
+					cause the step backdrop and highlight to be displayed incorrectly. This is due to CSS standards and is not a bug in Tourist.<br><br>
+					Setting this option to <code>true</code> will instruct Tourist to create cloned overlays for the backdrop and highlight, which visually
+					solves this issue. You can read more about the <code>z-index</code> CSS considerations at <a target="_blank" href="https://coder-coder.com/z-index-isnt-working/">this website</a>, and more about this specific
+					Tourist option in  <a target="_blank" href="https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/issues/38">this Github issue</a>.
+				</td>
+				<td><code>false</code></td>
 			</tr>
 
 			<tr>

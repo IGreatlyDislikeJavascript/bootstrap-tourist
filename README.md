@@ -549,6 +549,7 @@ Tourist now has documentation included in the repo under the `/docs/` folder. Ta
         backdropOptions:    {
             highlightOpacity: 0.8,
             highlightColor: '#FFF',
+			backdropSibling: false,
             animation: {
                 // can be string of css class or function signature: function(domElement, step) {}
                 backdropShow: function(domElement) {
@@ -570,6 +571,7 @@ Tourist now has documentation included in the repo under the `/docs/` folder. Ta
         ```
     - `backdropOptions.highlightOpacity`: the alpha value of the div used to highlight the step element. You can control how visible/occluded the element is.
     - `backdropOptions.highlightColor`: the hex color code for the highlight. Normally you will want to use a white highlight (#FFF). However if your step element has a dark or black background, you may want to use a black highlight (#000). Experiment with the best colors for your UX.
+	- `backdropOptions.backdropSibling`: solves display issues when step.element is a child of an element with fixed position or zindex specified
     - `backdropOptions.animation`: The options can be either string literals specifying a CSS class, or a function. The application of these features work in exactly the same way for all backdropOptions.animation options. These options apply as per the following:
         - `backdropShow`: when a previously hidden backdrop is shown
         - `backdropHide`: when a previously visible backdrop is hidden
