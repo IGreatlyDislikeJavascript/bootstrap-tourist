@@ -1,6 +1,6 @@
 /* ========================================================================
  *
- * Bootstrap Tourist v0.3.2
+ * Bootstrap Tourist v0.3.3-in progress
  * Copyright FFS 2019
  * @ IGreatlyDislikeJavascript on Github
  *
@@ -372,6 +372,12 @@
 				// required so we don't overwrite the global options.
 				this._options.steps[i].backdropOptions = $.extend(true, {}, this._options.backdropOptions, this._options.steps[i].backdropOptions);
 
+				// safety to ensure consistent logic - reflex must == true if reflexOnly == true
+				if(this._options.steps[i].reflexOnly == true)
+				{
+					this._options.steps[i].reflex = true;
+				}
+
 				return this._options.steps[i];
 			}
 		};
@@ -496,6 +502,7 @@
 					_this._setState('end', 'yes');
 					_this._clearTimer();
 					$(".tour-step-element-reflex").removeClass("tour-step-element-reflex");
+					$(".tour-step-element-reflexOnly").removeClass("tour-step-element-reflexOnly");
                     _this._hideBackdrop();
 					_this._destroyOverlayElements();
 
@@ -623,6 +630,7 @@
 					if (step.reflex)
 					{
 						$element.removeClass('tour-step-element-reflex').off((_this._reflexEvent(step.reflex)) + ".tour-" + _this._options.name);
+						$element.removeClass('tour-step-element-reflexOnly');
 					}
 
 					// now handled by updateOverlayElements
@@ -1261,6 +1269,11 @@
 
 					if(step.reflexOnly)
 					{
+						// this pseudo-class is used to quickly identify reflexOnly steps in handlers / code that don't have access to tour.step (without
+						// costly reloading) but need to know about reflexOnly. For example, obeying reflexOnly in keyboard handler. Solves
+						// https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist/issues/45
+						$element.addClass('tour-step-element-reflexOnly');
+
 						// Only disable the next button if this step is NOT an orphan.
 						// This is difficult to achieve robustly because tour creator can use a custom template. Instead of trying to manually
 						// edit the template - which must be a string to be passed to popover creation - use jquery to find the element, hide
@@ -1648,26 +1661,36 @@
 						switch (e.which)
 						{
 							case 39:
-								e.preventDefault();
-								if(_this._isLast())
+								// arrow right
+								if($(".tour-step-element-reflexOnly").length == 0)
 								{
-									return _this.end();
+									e.preventDefault();
+									if(_this._isLast())
+									{
+										return _this.end();
+									}
+									else
+									{
+										return _this.next();
+									}
 								}
-								else
-								{
-									return _this.next();
-								}
+
 								break;
 
 							case 37:
-								e.preventDefault();
-								if (_this._current > 0)
+								// arrow left
+								if($(".tour-step-element-reflexOnly").length == 0)
 								{
-									return _this.prev();
+									e.preventDefault();
+									if (_this._current > 0)
+									{
+										return _this.prev();
+									}
 								}
 								break;
 
 							case 27:
+								// escape
 								e.preventDefault();
 								return _this.end();
 								break;
