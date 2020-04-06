@@ -246,6 +246,7 @@
 
 				var whiteListAdditions = {
 											"button":	["data-role", "style"],
+											"a":		["data-role"],
 											"img":		["style"],
 											"div":		["style"]
 										};
