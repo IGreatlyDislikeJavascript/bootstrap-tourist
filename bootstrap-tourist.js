@@ -1376,7 +1376,9 @@
 					else
 					{
 						// BS3 popover accepts jq object or string literal. BS4 popper.js of course doesn't, just to make life extra irritating.
-						popOpts.selector = "#" + step.element[0].id;
+						if (typeof step.element !== 'string') {
+							popOpts.selector = "#" + step.element[0].id;
+						}
 
 						// Allow manual repositioning of the popover
 						// THIS DOESN'T WORK - popper.js will only adjust on one axis even if both axis are specified...
