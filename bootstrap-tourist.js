@@ -1960,7 +1960,7 @@
 									fnPositionHighlight:	function()
 															{
 																_this._debug("Positioning highlight (fnPositionHighlight) over step element " + _stepElement[0].id + ":\nWidth = " + _stepElement.outerWidth() + ", height = " + _stepElement.outerHeight() + "\nTop: " + _stepElement.offset().top + ", left: " + _stepElement.offset().left);
-																$(DOMID_HIGHLIGHT).width(_stepElement.outerWidth()).height(_stepElement.outerHeight()).offset(_stepElement.offset());
+																$(DOMID_HIGHLIGHT).width(_stepElement.outerWidth()).height(_stepElement.outerHeight()).offset(_stepElement.offset()).css("border-radius", _stepElement.css("border-radius"));
 															},
 
 								};
@@ -2048,6 +2048,8 @@
 				// pass DOM element jq object to function. Function is completely responsible for positioning and showing.
 				// dupe the step to avoid function messing with original object.
 				step.backdropOptions.animation.highlightTransition($(DOMID_HIGHLIGHT), this._createStepSubset(step));
+				// Fixes highlight orphan misplaced after an orphan popup.
+				$(DOMID_HIGHLIGHT).width(0).height(0).offset({ top: 0, left: 0 });
 			}
 			else
 			{
@@ -2057,7 +2059,8 @@
 				// obey step options
 				$(DOMID_HIGHLIGHT).css(	{
 											"opacity": step.backdropOptions.highlightOpacity,
-											"background-color": step.backdropOptions.highlightColor
+											"background-color": step.backdropOptions.highlightColor,
+											"border-radius": $(step.element).css("border-radius")
 										});
 
 				// add transition animations
