@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist#readme",
   "devDependencies": {
-    "standard-version": "^7.0.0"
+    "standard-version": "^8.0.1"
   },
   "dependencies": {}
 }
