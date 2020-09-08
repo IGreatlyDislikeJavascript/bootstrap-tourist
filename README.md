@@ -90,10 +90,12 @@ Tourist now has documentation included in the repo under the `/docs/` folder. Ta
     var tour = new Tour({
         steps: tourSteps,
         framework: "bootstrap3",   // or "bootstrap4" depending on your version of bootstrap
-        buttonTexts: {             // customize or localize button texts
-            nextButton: "go on",
-            endTourButton: "ok it's over",
-        },
+	localization: {		   // customize or localize button texts
+		buttonTexts: {             
+		    nextButton: "go on",
+		    endTourButton: "ok it's over",
+		}
+	},
         onNext: function(tour) {
             if (someVar = true) {
                 // force the tour to jump to slide 3
