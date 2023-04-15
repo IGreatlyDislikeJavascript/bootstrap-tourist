@@ -235,7 +235,7 @@
                 }
 
                 var whiteListAdditions = {
-                    "button": ["data-role", "style"],
+                    "button": ["data-role", "style", "data-pause-text", "data-resume-text"],
                     "img": ["style"],
                     "div": ["style"]
                 };
@@ -811,18 +811,7 @@
             })(this);
 
 
-            // delay in millisec specified in step options
-            showDelay = step.delay.show || step.delay;
-            if ({}
-                .toString.call(showDelay) === '[object Number]' && showDelay > 0) {
-                this._debug("Wait " + showDelay + " milliseconds to show the step " + (this._current + 1));
-                window.setTimeout((function (_this) {
-                    return function () {
-                        return _this._callOnPromiseDone(promise, showStepHelper);
-                    };
-                })(this), showDelay);
-            }
-            else {
+            {
                 if (step.delayOnElement) {
                     // delay by element existence or max delay (default 2 sec)
                     var $delayElement = null;
@@ -873,8 +862,20 @@
                     }, delayMax);
                 }
                 else {
+                    // delay in millisec specified in step options
+                    showDelay = step.delay.show || step.delay;
+                    if ({}
+                        .toString.call(showDelay) === '[object Number]' && showDelay > 0) {
+                        this._debug("Wait " + showDelay + " milliseconds to show the step " + (this._current + 1));
+                        window.setTimeout((function (_this) {
+                            return function () {
+                                return _this._callOnPromiseDone(promise, showStepHelper);
+                            };
+                        })(this), showDelay);
+                    } else {
                     // no delay by milliseconds or delay by time
-                    this._callOnPromiseDone(promise, showStepHelper);
+                        this._callOnPromiseDone(promise, showStepHelper);
+                    }
                 }
             }
 
@@ -1297,8 +1298,10 @@
                     }
                 }
 
-                $element.popover(popOpts);
-                $element.popover('show');
+                if ($element.popover != undefined) {
+                    $element.popover(popOpts);
+                    $element.popover('show');
+                }
 
                 if (this._options.framework == "bootstrap3") {
                     $tip = $element.data('bs.popover') ? $element.data('bs.popover').tip() : $element.data('popover').tip();
@@ -1562,7 +1565,6 @@
                                     return _this.next();
                                 }
                             }
-
                             break;
 
                         case 37:
