@@ -1,7 +1,7 @@
 {
   "name": "bootstrap-tourist",
   "version": "0.3.2",
-  "description": "Quick and easy way to build your product tours with Bootstrap Popovers for Bootstrap 3 and 4",
+  "description": "Quick and easy way to build your product tours with Bootstrap Popovers for Bootstrap 3, 4 and 5",
   "main": "bootstrap-tourist.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
