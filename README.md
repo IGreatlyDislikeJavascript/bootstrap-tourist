@@ -1,16 +1,16 @@
 # Bootstrap Tourist [![NPM Version](http://img.shields.io/npm/v/bootstrap-tourist.svg?style=flat)](https://www.npmjs.org/)
 
-Quick and easy way to build your product tours with Bootstrap Popovers for Bootstrap 3 and 4.
+Quick and easy way to build your product tours with Bootstrap Popovers for Bootstrap 3, 4 and 5.
 
 ## About Bootstrap Tourist
 Bootstrap Tourist (called "Tourist" from here) is a fork of Bootstrap Tour, a plugin to create product tours.
 
 The original Bootstrap Tour was written in coffeescript, and had a number of open feature and bug fix requests in the github repo. Bootstrap Tourist is an in-progress effort to move Bootstrap Tour to native ES6, fix some issues and add some requested features. You can read more about why Bootstrap Tourist exists, and why it's not a github fork anymore, here: https://github.com/sorich87/bootstrap-tour/issues/713
 
-Tourist works with Bootstrap 3.4 and 4.3 (specify "framework" option), however the "standalone" non-Bootstrap version is not available
+Tourist works with Bootstrap 3.4, 4.3 and 5.2 (specify "framework" option), however the "standalone" non-Bootstrap version is not available
 
 ## Minimum Bootstrap / jQuery requirements
-There are some bugs in earlier BS3 and BS4, and jquery versions, that cause problems with Tourist. Please use minimum Bootstrap 3.4.x or 4.3.x, jquery 3.3.1 to avoid. Earlier versions may work, but try for yourself.
+There are some bugs in earlier BS3, BS4 and BS5, and jquery versions, that cause problems with Tourist. Please use minimum Bootstrap 3.4.x or 4.3.x or 5.2.x, jquery 3.3.1 to avoid. Earlier versions may work, but try for yourself.
 
 ## Getting started with Bootstrap Tourist
 If you are new to Bootstrap Tourist, and don't have Bootstrap Tour working, it's as simple as doing the following:
@@ -25,7 +25,7 @@ If you are new to Bootstrap Tourist, and don't have Bootstrap Tour working, it's
 1. Next, set up and start your tour with some steps:
     ```js
     var tour = new Tour({
-        framework: 'bootstrap3',   // or "bootstrap4" depending on your version of bootstrap
+        framework: 'bootstrap3',   // or "bootstrap4" or "bootstrap5" depending on your version of bootstrap
         steps: [
             {
                 element: '#my-element',
@@ -89,7 +89,7 @@ Tourist now has documentation included in the repo under the `/docs/` folder. Ta
 
     var tour = new Tour({
         steps: tourSteps,
-        framework: "bootstrap3",   // or "bootstrap4" depending on your version of bootstrap
+        framework: "bootstrap3",   // or "bootstrap4" or "bootstrap5" depending on your version of bootstrap
         buttonTexts: {             // customize or localize button texts
             nextButton: "go on",
             endTourButton: "ok it's over",
@@ -184,7 +184,7 @@ Tourist now has documentation included in the repo under the `/docs/` folder. Ta
 
             var tour = new Tour({
                 steps: tourSteps,
-                framework: "bootstrap3",    // or "bootstrap4" depending on your version of bootstrap
+                framework: "bootstrap3",    // or "bootstrap4" or "bootstrap5" depending on your version of bootstrap
                 onElementUnavailable: tourBroken, // default "element unavailable" handler for all tour steps
             });
             ```
@@ -215,7 +215,7 @@ Tourist now has documentation included in the repo under the `/docs/` folder. Ta
             ];
 
             var tour = new Tour({
-                framework: "bootstrap3",    // or "bootstrap4" depending on your version of bootstrap
+                framework: "bootstrap3",    // or "bootstrap4" or "bootstrap5" depending on your version of bootstrap
                 steps: tourSteps,
                 showProgressBar: true,      // default show progress bar
                 showProgressText: true,     // default show progress text
@@ -337,7 +337,7 @@ Tourist now has documentation included in the repo under the `/docs/` folder. Ta
         ```js
         var tour = new Tour({
             steps: tourSteps,
-            framework: "bootstrap3",    // or "bootstrap4" depending on your version of bootstrap
+            framework: "bootstrap3",    // or "bootstrap4" or "bootstrap5" depending on your version of bootstrap
             onModalHidden: function(tour, stepNumber) {
                 console.log("Well damn, this step's element was a modal, or inside a modal, and the modal just done got dismissed y'all. Moving to step 3.");
 
@@ -400,7 +400,7 @@ Tourist now has documentation included in the repo under the `/docs/` folder. Ta
         ```js
         var tour = new Tour({
             steps: [ ... ],
-            framework: "bootstrap3",    // or "bootstrap4" depending on your version of bootstrap
+            framework: "bootstrap3",    // or "bootstrap4" or "bootstrap5" depending on your version of bootstrap
             onPreviouslyEnded:  function(tour) {
                 console.log("Looks like this tour has already ended");
             },
@@ -408,29 +408,29 @@ Tourist now has documentation included in the repo under the `/docs/` folder. Ta
 
         tour.start();
         ```
-1. Switch between Bootstrap 3 or 4 (popover methods, template) automatically using tour options, or use a custom template:
+1. Switch between Bootstrap 3 or 4 or 5 (popover methods, template) automatically using tour options, or use a custom template:
     - With thanks to this thread: https://github.com/sorich87/bootstrap-tour/pull/643
-    - Tour is compatible with bootstrap 3 and 4 if the right template and framework is used for the popover. Bootstrap3 framework compatibility is used by default.
+    - Tour is compatible with bootstrap 3, 4 and 5if the right template and framework is used for the popover. Bootstrap3 framework compatibility is used by default.
     - To select the correct template and framework, use the "framework" global option. Note this option does more than just select a template, it also changes which methods are used to manage the Tour popovers to be BS3 or BS4 compatible.
         ```js
         var tour = new Tour({
             steps: tourSteps,
             template: null,         // template option is null by default. Tourist will use the appropriate template for the framework version, in this case BS3 as per next option
-            framework: "bootstrap3", // can be string literal "bootstrap3" or "bootstrap4"
+            framework: "bootstrap3", // can be string literal "bootstrap3" or "bootstrap4" or "bootstrap5"
         });
         ```
     - To use a custom template, use the "template" global option:
         ```js
         var tour = new Tour({
             steps: tourSteps,
-            framework: "bootstrap4", // can be string literal "bootstrap3" or "bootstrap4"
+            framework: "bootstrap4", // can be string literal "bootstrap3" or "bootstrap4" or "bootstrap5"
             template: '<div class="popover" role="tooltip">....blah....</div>'
         });
         ```
     - Review the following logic:
-        - If template == null, default framework template is used based on whether framework is set to "bootstrap3" or "bootstrap4"
+        - If template == null, default framework template is used based on whether framework is set to "bootstrap3" or "bootstrap4" or "bootstrap5"
         - If template != null, the specified template is always used
-        - If framework option is not literal "bootstrap3" or "bootstrap4", error will occur
+        - If framework option is not literal "bootstrap3" or "bootstrap4" or "bootstrap5", error will occur
     - To add additional templates, search the code for "PLACEHOLDER: TEMPLATES LOCATION". This will take you to an array that contains the templates, simply edit or add as required.
 1. Options to manipulate the Bootstrap sanitizer, and fix the sanitizer related breaking change in BS 3.4.x:
     - BS 3.4.1 added a sanitizer to popover and tooltips - this breaking change strips non-whitelisted DOM elements from popover content, title etc.
@@ -482,7 +482,7 @@ Tourist now has documentation included in the repo under the `/docs/` folder. Ta
     - You can now change the text displayed for the buttons used in the tour step popups. For this, there is a new object you can pass to the options, called "localization". This option only applies to the default templates. If you specify your own custom template, the localization.buttonTexts option has no effect on the basis that you will make any changes to your own template directly.
         ```js
         var tour = new Tour({
-            framework: "bootstrap3",    // or "bootstrap4" depending on your version of bootstrap
+            framework: "bootstrap3",    // or "bootstrap4" or "bootstrap5" depending on your version of bootstrap
             steps: [ ..... ],
             localization: {
                 buttonTexts: {
